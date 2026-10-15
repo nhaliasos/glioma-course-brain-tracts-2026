@@ -1,0 +1,58 @@
+# data/manifest.yaml
+# Where every dataset comes from. The files themselves are NOT in Git:
+# scripts/fetch_data.py (to be written) downloads them into data/<path>.
+#
+# url / sha256 are null until verified by the first successful fetch.
+# license "unverified" means: check the source page before redistributing.
+# Keep the layout: dataset id at 2 spaces, fields at 4 spaces (doctor.py reads it).
+
+version: 1
+
+datasets:
+  fsaverage:
+    description: FreeSurfer fsaverage population-average cortical surfaces and Desikan parcellation
+    page: https://surfer.nmr.mgh.harvard.edu/
+    url: null
+    path: fsaverage
+    sha256: null
+    license: unverified
+
+  org:
+    description: O'Donnell Research Group (ORG) white-matter atlas, tracts used for display (arcuate, IFOF, ILF, SLF, splenium)
+    page: https://dmri.slicer.org/atlases/
+    url: null
+    path: org
+    sha256: null
+    license: unverified
+
+  org_t1:
+    description: T1 volume that accompanies the ORG atlas (all other layers are fitted to it)
+    page: https://dmri.slicer.org/atlases/
+    url: null
+    path: org_t1
+    sha256: null
+    license: unverified
+
+  hcp1065:
+    description: HCP1065 population-averaged tract atlas (optic radiation), Yeh et al.
+    page: https://brain.labsolver.org/
+    url: null
+    path: hcp1065
+    sha256: null
+    license: unverified
+
+  consult:
+    description: CONSULT population probability maps of Meyer's loop (NeuroVault collection 11045)
+    page: https://neurovault.org/collections/11045/
+    url: null
+    path: consult
+    sha256: null
+    license: not stated on the NeuroVault page - link only, do not redistribute
+
+  spl_atlas:
+    description: SPL/NAC brain atlas, used only for the angular and supramarginal gyri highlight
+    page: https://www.spl.harvard.edu/publications/item/view/2037
+    url: null
+    path: spl_atlas
+    sha256: null
+    license: unverified
