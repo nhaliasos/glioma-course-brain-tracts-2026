@@ -2,6 +2,8 @@
 
 The panel has a header (scene state + hemisphere), tabs, and a footer (camera) that are always visible.
 Each section is:  (title, buttons_per_row, [(button label, action), ...])
+A section with buttons_per_row == "style" holds the density / thickness sliders: [(label, "density"|"thickness", min, max), ...]
+(density is in %, thickness in 1/100 mm; they rebuild all tracts when released).
 A section with buttons_per_row == "sliders" holds sliders instead:  [(label, group, min, max), ...]
     group: tracts | surface | deep  -> opacity of that set of models (the same words work as opacity:<group>:<0-1>)
 
@@ -13,6 +15,7 @@ Actions (the same words a keyboard shortcut or a voice command will use later):
                                   uf, mdlf, vof, ec, ic, cr, cst, fstr, sagittal, optic, meyer, visual, lang, tracts, wow, full
     side:<left|right|both>        which hemisphere the tracts are shown on
     surface:<gyri|inflated|glass> brain surface on/off (one at a time)
+    style:density:<0.05-1>        fraction of streamlines drawn;  style:thickness:<mm>  tube radius;  style:reset
     opacity:<tracts|surface|deep>:<0-1>   set the opacity of a set of models
     view:reset                    back to a straight side view, centred
     look:<left|right|top|front|back|bottom>   camera direction
@@ -50,6 +53,10 @@ TABS = [
         ("SAGITTAL", 1, [("Sagittal stratum", "tract:sagittal")]),
         ("", 1, [("Clear all tracts", "tract:clear")]),
         ("OPACITY", "sliders", [("Tracts", "tracts", 0.05, 1.0)]),
+    ]),
+    ("Style", [
+        ("TRACT DRAWING", "style", [("Density", "density", 5, 100), ("Thickness", "thickness", 5, 150)]),
+        ("", 1, [("Reset style", "style:reset")]),
     ]),
     ("Brain", [
         ("DEEP STRUCTURES", 3, [("Ventricles", "tract:ventricles"), ("Basal ganglia", "tract:bg"),

@@ -2,8 +2,11 @@
 import os
 
 import ctk
+import numpy as np
+import qt
 import slicer
 import vtk  # noqa: F401  (kept: some scene operations rely on it being imported)
+from vtk.util.numpy_support import vtk_to_numpy
 
 
 class Controller:
@@ -23,6 +26,9 @@ class Controller:
         self.i = -1
         self.spinning = False
         self.planes_on = False
+        self.density = 1.0           # fraction of each tract's streamlines that is drawn (Style tab)
+        self.radius = self.DEFAULT_RADIUS   # tube radius in mm (Style tab)
+        self._src = {}               # tract model name -> its streamlines, recovered from the tube mesh
         self.loading = False         # True while the scene file is being read (drives the scene button colour)
         self.surface = None          # 'glass' | 'gyri' | 'inflated' | None, set by the surface buttons
         self.on = []                 # tract keys switched on with the tract buttons, in order
@@ -60,6 +66,7 @@ class Controller:
             self.loading = False
         print('gbt2026: scene', 'loaded' if ok else 'FAILED to load', path)
         if ok:
+            self.density, self.radius, self._src = 1.0, self.DEFAULT_RADIUS, {}
             self.planes(False)               # a freshly loaded scene starts clean: no slice planes, nothing shown
             self.hide_all()
         self._notify()                       # ... and green when it is done
@@ -251,6 +258,71 @@ class Controller:
             elif group == 'tracts' and nm.startswith(self.TRACT_PREFIXES) and not nm.startswith(self.DEEP_PREFIXES):
                 yield n
 
+    # ---- density and thickness ------------------------------------------
+    DEFAULT_RADIUS = 0.4
+
+    def _streamlines(self, name, node):
+        """The streamlines behind a tract's tube mesh (tubes have 6 sides: ring r = points 6r..6r+5, 6 strips per line)."""
+        if name in self._src:
+            return self._src[name]
+        pd = node.GetPolyData()
+        P = vtk_to_numpy(pd.GetPoints().GetData()).astype(float)
+        cells = pd.GetStrips()
+        off = vtk_to_numpy(cells.GetOffsetsArray())
+        con = vtk_to_numpy(cells.GetConnectivityArray())
+        lines = []
+        for i in range(0, len(off) - 1, 6):                      # the first of each line's 6 side-strips
+            rings = con[off[i]:off[i + 1]] // 6
+            a, b = int(rings.min()), int(rings.max())
+            lines.append(P[a * 6:(b + 1) * 6].reshape(-1, 6, 3).mean(axis=1))
+        order = np.random.RandomState(0).permutation(len(lines))   # fixed order: the same lines stay when density changes
+        self._src[name] = (lines, order)
+        return self._src[name]
+
+    def apply_style(self):
+        """Rebuild every tract's tubes with the current density and radius."""
+        slicer.app.setOverrideCursor(qt.Qt.WaitCursor)
+        try:
+            for nm, n in self.models().items():
+                if not (nm.startswith(self.TRACT_PREFIXES) and not nm.startswith(self.DEEP_PREFIXES)) \
+                        or nm.endswith('(volume)') or n.GetPolyData() is None or n.GetPolyData().GetNumberOfStrips() == 0:
+                    continue
+                lines, order = self._streamlines(nm, n)
+                keep = max(1, int(round(len(lines) * self.density)))
+                pts, cells, k = vtk.vtkPoints(), vtk.vtkCellArray(), 0
+                for idx in order[:keep]:
+                    ln = lines[idx]
+                    cells.InsertNextCell(len(ln))
+                    for p in ln:
+                        pts.InsertNextPoint(*p)
+                        cells.InsertCellPoint(k)
+                        k += 1
+                src = vtk.vtkPolyData()
+                src.SetPoints(pts)
+                src.SetLines(cells)
+                tube = vtk.vtkTubeFilter()
+                tube.SetInputData(src)
+                tube.SetRadius(self.radius)
+                tube.SetNumberOfSides(6)
+                tube.CappingOff()
+                tube.Update()
+                out = vtk.vtkPolyData()
+                out.DeepCopy(tube.GetOutput())
+                n.SetAndObservePolyData(out)
+        finally:
+            slicer.app.restoreOverrideCursor()
+        slicer.app.layoutManager().threeDWidget(0).threeDView().forceRender()
+        self._notify()
+
+    def set_style(self, what, value):
+        if what == 'density':
+            self.density = max(0.05, min(1.0, float(value)))
+        elif what == 'thickness':
+            self.radius = max(0.05, min(3.0, float(value)))
+        elif what == 'reset':
+            self.density, self.radius = 1.0, self.DEFAULT_RADIUS
+        self.apply_style()
+
     def set_opacity(self, group, v):
         v = max(0.0, min(1.0, float(v)))
         for n in self._opacity_models(group):
@@ -360,6 +432,9 @@ class Controller:
             self.scene(arg)
         elif kind == 'surface':
             self.set_surface(arg)
+        elif kind == 'style':
+            what, _, val = arg.partition(':')
+            self.set_style(what, val or 0)
         elif kind == 'opacity':
             grp, _, val = arg.partition(':')
             self.set_opacity(grp, val)

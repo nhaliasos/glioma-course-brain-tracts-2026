@@ -36,6 +36,7 @@ def build(D):
     toggles = {}                     # tract key -> button, so the checked state follows D.on
     flags = {}                       # button -> function telling whether it is "on"
     sliders = {}                     # opacity group -> slider
+    style_sliders = {}               # 'density' | 'thickness' -> (slider, label)
     scene_btns = []
 
     def sync():
@@ -43,6 +44,12 @@ def build(D):
             btn.setChecked(key in D.on)
         for btn, fn in flags.items():
             btn.setChecked(bool(fn()))
+        for key, (sl, lab) in style_sliders.items():
+            v = D.density if key == 'density' else D.radius
+            sl.blockSignals(True)
+            sl.setValue(int(round(v * 100)))
+            sl.blockSignals(False)
+            lab.setText(('%d%%' % int(round(v * 100))) if key == 'density' else ('%.2f mm' % v))
         for grp, (sl, lab) in sliders.items():
             v = D.get_opacity(grp, sl.value / 100.0)
             sl.blockSignals(True)
@@ -69,6 +76,30 @@ def build(D):
         for title, per_row, items in sections:
             if title:
                 root.addWidget(qt.QLabel(title))
+            if per_row == 'style':
+                for label, key, lo, hi in items:
+                    row = qt.QHBoxLayout()
+                    name = qt.QLabel(label)
+                    name.setFixedWidth(62)
+                    sl = qt.QSlider(qt.Qt.Horizontal)
+                    sl.setRange(lo, hi)
+                    sl.setTracking(False)              # rebuild the tubes only when the slider is released
+                    val = qt.QLabel('')
+                    val.setFixedWidth(46)
+
+                    def shown(v, k=key, lab=val):
+                        lab.setText(('%d%%' % v) if k == 'density' else ('%.2f mm' % (v / 100.0)))
+
+                    def released(v, k=key):
+                        D.do('style:%s:%.2f' % (k, v / 100.0))
+                    sl.connect('sliderMoved(int)', shown)
+                    sl.connect('valueChanged(int)', released)
+                    style_sliders[key] = (sl, val)
+                    row.addWidget(name)
+                    row.addWidget(sl)
+                    row.addWidget(val)
+                    root.addLayout(row)
+                continue
             if per_row == 'sliders':
                 for label, grp, lo, hi in items:
                     row = qt.QHBoxLayout()
