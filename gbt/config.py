@@ -1,0 +1,26 @@
+"""Tiny reader for gbt.local.yaml (plain 'key: value' lines, no PyYAML needed inside Slicer)."""
+import os
+import re
+
+DEFAULTS = {
+    "scene": "data/scenes/gbt2026_scene.mrb",   # relative to the repo root, or an absolute path
+    "autoload_scene": "false",                  # true = load the scene when Slicer starts
+}
+
+
+def load(repo_root):
+    cfg = dict(DEFAULTS)
+    path = os.path.join(repo_root, "gbt.local.yaml")
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                m = re.match(r"^\s*([A-Za-z_]+)\s*:\s*([^#]*?)\s*(#.*)?$", line)
+                if m and m.group(2):
+                    cfg[m.group(1)] = m.group(2).strip("\"'")
+    scene = cfg["scene"]
+    if not os.path.isabs(scene):
+        scene = os.path.join(repo_root, scene)
+    cfg["scene_path"] = os.path.normpath(scene)
+    cfg["autoload_scene"] = str(cfg["autoload_scene"]).lower() in ("1", "true", "yes", "on")
+    cfg["repo_root"] = repo_root
+    return cfg
