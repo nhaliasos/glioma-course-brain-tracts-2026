@@ -75,7 +75,7 @@ def streams_to_polydata(streams):
     return pd
 
 
-def add_tube_model(name, streams, color, opacity=1.0):
+def add_tube_model(name, streams, color, opacity=0.15):
     """Replace/add a hidden tube model called `name` built from streamlines."""
     try:
         slicer.mrmlScene.RemoveNode(slicer.util.getNode(name))
@@ -103,7 +103,7 @@ def add_tube_model(name, streams, color, opacity=1.0):
     return node
 
 
-def add_org_tract(mrb_path, label, color, per_side=150, opacity=1.0):
+def add_org_tract(mrb_path, label, color, per_side=150, opacity=0.15):
     """Build '<label> (left)' and '<label> (right)' from one ORG tract file. Returns a summary."""
     streams = read_org_streamlines(mrb_path)
     left, right = split_sides(streams)
