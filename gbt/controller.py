@@ -64,7 +64,12 @@ class Controller:
         return 'Showing: %s (%s)' % (self.cur or '-', self.side)
 
     # ---- name tables ---------------------------------------------------
+    STRUCT = {'ventricles': 'Ventricles', 'bg': 'Basal ganglia', 'brainstem': 'Brainstem'}   # SPL atlas deep structures
+
     def names(self, key, side):
+        if key in self.STRUCT:
+            pre = self.STRUCT[key] + ':'
+            return [n for n in self.models() if n.startswith(pre) and n.endswith(('(%s)' % side, '(mid)'))]
         if key == 'splenium':
             return ['Splenium (CC7)']
         if key == 'tapetum':
@@ -90,7 +95,8 @@ class Controller:
 
     TRACT_PREFIXES = ('SLF', 'Arcuate', 'IFOF', 'ILF', 'Splen', 'Optic', "Meyer", 'Uncinate', 'MdLF',
                       'External capsule', 'Internal capsule', 'Corona radiata', 'VOF', 'Tapetum',
-                      'Corticospinal', 'Frontostriatal')
+                      'Corticospinal', 'Frontostriatal',
+                      'Ventricles', 'Basal ganglia', 'Brainstem')
     GROUPS = {'sagittal': ['ifof', 'ilf', 'optic']}      # composite buttons
 
     def hide_tracts(self):

@@ -112,3 +112,55 @@ def add_org_tract(mrb_path, label, color, per_side=150, opacity=0.15):
         if group:
             add_tube_model('%s (%s)' % (label, side), sample(group, per_side), color, opacity)
     return summary
+
+
+# ---- SPL atlas deep structures ------------------------------------------------------
+SPL_MODELS = r'data\SPL_Atlas\extracted\spl_pnl_brain_atlas_2007\03-models'
+SPL_GROUPS = {
+    'Ventricles': [('lateral_ventricle_L', 'left', (0.3, 0.5, 1.0)), ('lateral_ventricle_R', 'right', (0.3, 0.5, 1.0)),
+                   ('third_ventricle', 'mid', (0.3, 0.5, 1.0)), ('fourth_ventricle', 'mid', (0.3, 0.5, 1.0))],
+    'Basal ganglia': [('caudate_nucleus_L', 'left', (0.95, 0.6, 0.2)), ('caudate_nucleus_R', 'right', (0.95, 0.6, 0.2)),
+                      ('putamen_L', 'left', (0.85, 0.3, 0.5)), ('putamen_R', 'right', (0.85, 0.3, 0.5)),
+                      ('globus_pallidus_L', 'left', (0.2, 0.75, 0.6)), ('globus_pallidus_R', 'right', (0.2, 0.75, 0.6))],
+    'Brainstem': [('midbrain', 'mid', (0.8, 0.7, 0.55)), ('pons', 'mid', (0.75, 0.65, 0.5)),
+                  ('medulla_oblongata', 'mid', (0.7, 0.6, 0.45))],
+}
+
+
+def add_spl_structures(repo_root, opacity=0.6):
+    """Load SPL atlas deep structures as hidden models named '<Group>: <structure> (left|right|mid)'.
+
+    The SPL .vtk files are in RAS; Slicer reads .vtk as LPS, so x and y are negated after loading.
+    They are parented to SPL_to_ORG_affine like the SPL MRI and the SPL cortex segmentation.
+    """
+    tf = slicer.util.getNode('SPL_to_ORG_affine')
+    made = []
+    for group, items in SPL_GROUPS.items():
+        for fname, side, color in items:
+            base = fname[:-2] if fname.endswith(('_L', '_R')) else fname
+            name = '%s: %s (%s)' % (group, base, side)
+            try:
+                slicer.mrmlScene.RemoveNode(slicer.util.getNode(name))
+            except Exception:
+                pass
+            node = slicer.util.loadModel(os.path.join(repo_root, SPL_MODELS, fname + '.vtk'))
+            node.SetName(name)
+            pts = node.GetPolyData().GetPoints()
+            for i in range(pts.GetNumberOfPoints()):
+                x, y, z = pts.GetPoint(i)
+                pts.SetPoint(i, -x, -y, z)
+            pts.Modified()
+            node.GetPolyData().GetPointData().SetNormals(None)
+            node.GetPolyData().Modified()
+            node.SetAndObserveTransformNodeID(tf.GetID())
+            d = node.GetDisplayNode()
+            d.SetColor(*color)
+            d.SetOpacity(opacity)
+            d.SetAmbient(0.3)
+            d.SetDiffuse(0.75)
+            d.SetSpecular(0.35)
+            d.SetScalarVisibility(False)
+            d.SetSliceIntersectionVisibility(False)
+            d.SetVisibility(False)
+            made.append(name)
+    return made

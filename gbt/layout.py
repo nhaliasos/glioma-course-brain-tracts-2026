@@ -34,6 +34,7 @@ SECTIONS = [
     ("VISUAL", 2, [("Optic radiation", "tract:optic"), ("Meyer's loop", "tract:meyer")]),
     ("SAGITTAL", 1, [("Sagittal stratum", "tract:sagittal")]),
     ("", 1, [("Clear all tracts", "tract:clear")]),
+    ("DEEP STRUCTURES", 3, [("Ventricles", "tract:ventricles"), ("Basal ganglia", "tract:bg"), ("Brainstem", "tract:brainstem")]),
     ("SURFACE", 1, [("Gyri and sulci", "surface:gyri"), ("Inflated", "surface:inflated"), ("Glass brain", "surface:glass")]),
     ("BRAIN", 2, [("T1 slices", "toggle:t1"), ("Reset 3D view", "view:reset")]),
 ]
