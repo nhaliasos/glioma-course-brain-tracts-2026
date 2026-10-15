@@ -320,6 +320,7 @@ class Controller:
 
     def setside(self, s):
         self.side = s
+        self._notify()                 # light up the Left / Right / Both button straight away
         if self.surface:
             self.apply_surface()
         if self.on:

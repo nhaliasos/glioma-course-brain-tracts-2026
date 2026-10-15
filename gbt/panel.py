@@ -99,6 +99,9 @@ def build(D):
                 if action.startswith('surface:'):
                     b.setCheckable(True)
                     flags[b] = (lambda k: (lambda: D.surface == k))(action.split(':', 1)[1])
+                if action.startswith('side:'):
+                    b.setCheckable(True)
+                    flags[b] = (lambda k: (lambda: D.side == k))(action.split(':', 1)[1])
                 if action == 'reload':
                     scene_btns.append(b)
                 if action == 'toggle:t1':
