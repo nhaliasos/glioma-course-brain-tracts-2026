@@ -37,6 +37,7 @@ except Exception as _e:
 LOCAL_CONFIG = """# gbt.local.yaml - settings for THIS machine (not tracked by Git)
 enabled: true                          # false = Slicer starts normally, without the gbt2026 panel
 scene: data/scenes/gbt2026_scene.mrb   # relative to the repo, or a full path
+webserver: false                       # true = start Slicer's Web Server at startup (only for remote control by Claude)
 autoload_scene: true                   # true = load the scene automatically when Slicer starts
 """
 
