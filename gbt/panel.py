@@ -60,6 +60,9 @@ def build(D):
             if action.startswith('tract:') and action != 'tract:clear':
                 b.setCheckable(True)
                 toggles[action.split(':', 1)[1]] = b
+            if action.startswith('surface:'):
+                b.setCheckable(True)
+                flags[b] = (lambda k: (lambda: D.surface == k))(action.split(':', 1)[1])
             if action == 'toggle:t1':
                 b.setCheckable(True)
                 flags[b] = lambda: D.planes_on

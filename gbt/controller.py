@@ -23,6 +23,7 @@ class Controller:
         self.i = -1
         self.spinning = False
         self.planes_on = False
+        self.surface = None          # 'glass' | 'gyri' | 'inflated' | None, set by the surface buttons
         self.on = []                 # tract keys switched on with the tract buttons, in order
         self.listeners = []          # callables run after every change, e.g. the panel label
 
@@ -139,6 +140,20 @@ class Controller:
         nm = {'glass': 'FS glass', 'gyri': 'FS cortex', 'inflated': 'FS inflated'}[kind]
         self.vis([nm + ' left', nm + ' right'])
 
+    def set_surface(self, kind):
+        """Surface buttons: one brain surface at a time; pressing the active one switches it off."""
+        if not self.scene_loaded():
+            print('gbt2026: scene not loaded - press "Load scene" first')
+            return self._notify()
+        self.surface = None if self.surface == kind else kind
+        for nm, n in self.models().items():
+            if nm.startswith('FS ') and n.GetDisplayNode():
+                n.GetDisplayNode().SetVisibility(False)
+        if self.surface:
+            self.surf(self.surface)
+        slicer.app.layoutManager().threeDWidget(0).threeDView().forceRender()
+        self._notify()
+
     def planes(self, on):
         self.planes_on = on
         for n in slicer.util.getNodesByClass('vtkMRMLSliceNode'):
@@ -219,6 +234,7 @@ class Controller:
             self.side = side
         self.cur = name
         self.on = []
+        self.surface = None
         self.hide_all()
         self.planes(False)
         self.frame(False)
@@ -282,6 +298,8 @@ class Controller:
             self.load_scene()
         elif kind == 'scene':
             self.scene(arg)
+        elif kind == 'surface':
+            self.set_surface(arg)
         elif kind == 'tract':
             self.clear_tracts() if arg == 'clear' else self.toggle_tract(arg)
         elif kind == 'side':
