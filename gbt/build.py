@@ -254,3 +254,63 @@ def add_tapetum(mrb_dir, per_side=250, color=(0.5, 0.5, 0.0), opacity=0.15):
         summary[side] = len(segs)
         add_tube_model('Tapetum (%s, derived)' % side, sample(segs, per_side), color, opacity)
     return summary
+
+
+# ---- Internal capsule parts (derived) -----------------------------------------------
+IC_PARTS = {      # name: colour
+    'anterior limb': (1.0, 0.25, 0.25), 'genu': (1.0, 0.8, 0.0), 'posterior limb': (0.25, 0.8, 0.25),
+    'retrolenticular': (0.25, 0.5, 1.0), 'sublenticular': (0.8, 0.3, 0.9),
+}
+IC_POOL = ['T_PLIC', 'T_CST', 'T_CR-F', 'T_CR-P', 'T_TF', 'T_TP', 'T_TO']
+
+
+def ic_classify(streams, lentiform_pts, dmax=6.0):
+    """Assign whole projection streamlines to a part of the internal capsule.
+
+    Not an atlas label: each streamline is placed by where it passes closest to the lentiform
+    nucleus (putamen + globus pallidus). Streamlines that never come within dmax mm, or pass lateral
+    to it, are dropped. Rules on that point (scene mm): z < -6 and -30 < y <= 2 sublenticular;
+    y <= -22 retrolenticular; y <= 0 posterior limb; y <= 8 genu; otherwise anterior limb.
+    """
+    from scipy.spatial import cKDTree
+    tree = cKDTree(lentiform_pts)
+    parts = {k: [] for k in IC_PARTS}
+    for s in streams:
+        d, i = tree.query(s)
+        k = int(np.argmin(d))
+        if d[k] > dmax:
+            continue
+        p, v = s[k], lentiform_pts[i[k]]
+        if abs(p[0]) > abs(v[0]) + 1.0:
+            continue
+        y, z = p[1], p[2]
+        if z < -6 and -30 < y <= 2:
+            nm = 'sublenticular'
+        elif y <= -22:
+            nm = 'retrolenticular'
+        elif y <= 0:
+            nm = 'posterior limb'
+        elif y <= 8:
+            nm = 'genu'
+        else:
+            nm = 'anterior limb'
+        parts[nm].append(s)
+    return parts
+
+
+def add_internal_capsule(mrb_dir, per_side=80, opacity=0.15):
+    """Build 'Internal capsule - <part> (left|right)' models. Needs the SPL basal ganglia in the scene."""
+    streams = []
+    for t in IC_POOL:
+        streams += read_org_streamlines(os.path.join(mrb_dir, t + '.mrb'))
+    left, right = split_sides(streams)
+    summary = {}
+    for side, group in (('left', left), ('right', right)):
+        len_pts = np.vstack([_world_points(slicer.util.getNode('Basal ganglia: %s (%s)' % (k, side)))
+                             for k in ('putamen', 'globus_pallidus')])
+        parts = ic_classify(group, len_pts)
+        for nm, segs in parts.items():
+            summary['%s %s' % (nm, side)] = len(segs)
+            if segs:
+                add_tube_model('Internal capsule - %s (%s)' % (nm, side), sample(segs, per_side), IC_PARTS[nm], opacity)
+    return summary

@@ -12,7 +12,10 @@ from vtk.util.numpy_support import vtk_to_numpy
 class Controller:
     TR = {'slf': ['SLF I', 'SLF II', 'SLF III'], 'slf1': ['SLF I'], 'slf2': ['SLF II'], 'slf3': ['SLF III'], 'arcuate': ['Arcuate'], 'ifof': ['IFOF'], 'ilf': ['ILF'],
           'optic': ['Optic radiation'], 'meyer': ["Meyer's loop"],
-          'uf': ['Uncinate'], 'mdlf': ['MdLF'], 'ec': ['External capsule'], 'ic': ['Internal capsule'],
+          'uf': ['Uncinate'], 'mdlf': ['MdLF'], 'ec': ['External capsule'],
+          'ic_ant': ['Internal capsule - anterior limb'], 'ic_genu': ['Internal capsule - genu'],
+          'ic_post': ['Internal capsule - posterior limb'], 'ic_retro': ['Internal capsule - retrolenticular'],
+          'ic_sub': ['Internal capsule - sublenticular'],
           'cr': ['Corona radiata (frontal)', 'Corona radiata (parietal)'], 'vof': ['VOF'],
           'cst': ['Corticospinal'], 'fstr': ['Frontostriatal']}
     SEQ = ['gyri', 'glass', 'angular', 'arcuate', 'ifof', 'ilf', 'slf', 'splenium', 'visual', 'lang', 'wow']
@@ -127,7 +130,8 @@ class Controller:
                       'Corticospinal', 'Frontostriatal',
                       'Ventricles', 'Basal ganglia', 'Brainstem')
     DEEP_PREFIXES = ('Ventricles', 'Basal ganglia', 'Brainstem')
-    GROUPS = {'sagittal': ['ifof', 'ilf', 'optic']}      # composite buttons
+    GROUPS = {'sagittal': ['ifof', 'ilf', 'optic'],
+              'ic': ['ic_ant', 'ic_genu', 'ic_post', 'ic_retro', 'ic_sub']}      # composite buttons
 
     def hide_tracts(self):
         for nm, n in self.models().items():

@@ -46,7 +46,12 @@ TABS = [
         ("SLF", 3, [("SLF I", "tract:slf1"), ("SLF II", "tract:slf2"), ("SLF III", "tract:slf3")]),
         ("PROJECTION", 2, [
             ("Corticospinal", "tract:cst"), ("Frontostriatal", "tract:fstr"),
-            ("Internal capsule", "tract:ic"), ("Corona radiata", "tract:cr"),
+            ("Corona radiata", "tract:cr"),
+        ]),
+        ("INTERNAL CAPSULE", 2, [
+            ("Anterior limb", "tract:ic_ant"), ("Genu", "tract:ic_genu"),
+            ("Posterior limb", "tract:ic_post"), ("Retrolenticular", "tract:ic_retro"),
+            ("Sublenticular", "tract:ic_sub"), ("All parts", "tract:ic"),
         ]),
         ("COMMISSURAL", 2, [("Splenium", "tract:splenium"), ("Tapetum", "tract:tapetum")]),
         ("VISUAL", 2, [("Optic radiation", "tract:optic"), ("Meyer's loop", "tract:meyer")]),

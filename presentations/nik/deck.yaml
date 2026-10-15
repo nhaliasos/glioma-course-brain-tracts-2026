@@ -22,7 +22,12 @@ tracts:
   ec:        {label: External capsule,             source: ORG}
   cst:       {label: Corticospinal tract,          source: ORG}
   fstr:      {label: Frontostriatal tract,         source: ORG}
-  ic:        {label: Internal capsule,             source: ORG, note: posterior limb only}
+  ic_ant:    {label: Internal capsule - anterior limb,    source: derived, note: "ORG projection fibres assigned by where they pass the lentiform nucleus; not an atlas label"}
+  ic_genu:   {label: Internal capsule - genu,             source: derived}
+  ic_post:   {label: Internal capsule - posterior limb,   source: derived}
+  ic_retro:  {label: Internal capsule - retrolenticular,  source: derived}
+  ic_sub:    {label: Internal capsule - sublenticular,    source: derived, note: few fibres; auditory radiation is not in the atlas}
+  ic:        {label: Internal capsule - all parts,        source: derived, note: composite of the five parts}
   cr:        {label: Corona radiata,               source: ORG, note: frontal and parietal parts}
   splenium:  {label: Splenium of the corpus callosum, source: ORG (CC7)}
   tapetum:   {label: Tapetum,                      source: derived, note: "not in any atlas; approximated from the lateral fibres of the ORG splenium (CC6/CC7)"}
@@ -63,6 +68,6 @@ caveats:
   - "Meyer's loop: CONSULT population probability maps (NeuroVault collection 11045); fibres generated from the volume, not measured. Citation and licence not stated on the NeuroVault page."
   - "Tapetum: derived from the lateral fibres of the ORG splenium (CC6/CC7); an approximation, not an atlas tract."
   - "Sagittal stratum: a composite of IFOF, ILF and optic radiation."
-  - "Internal capsule: ORG posterior limb only."
+  - "Internal capsule parts: derived by me from ORG projection tracts (CST, PLIC, corona radiata, thalamic radiations), split by where each fibre passes the lentiform nucleus; the atlas has no separate anterior limb, genu, retrolenticular or sublenticular labels."
   - "Cortex: FreeSurfer fsaverage (population average), scaled x1.076 to the extent of the ORG T1 brain; a different brain from the tracts, so endpoints do not land on exact gyri."
   - "Ventricles, basal ganglia, brainstem, subject T1 and angular/supramarginal gyri: SPL brain atlas (a single subject), fitted to the ORG space by an affine transform; approximate position."
