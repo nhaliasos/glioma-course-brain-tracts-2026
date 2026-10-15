@@ -1,0 +1,14 @@
+* text=auto
+*.py text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.ps1 text eol=crlf
+*.mrb binary
+*.nrrd binary
+*.vtk binary
+*.vtp binary
+*.tck binary
+*.trk binary
+*.nii binary
+*.gz binary
+*.zip binary
