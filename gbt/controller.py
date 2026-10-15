@@ -133,8 +133,6 @@ class Controller:
         sides = ['left', 'right'] if side == 'both' else [side]
         for k in keys:
             for sd in sides:
-                if k == 'splenium' and sd == 'right':
-                    continue
                 self.vis(self.names(k, sd))
 
     def surf(self, kind):
