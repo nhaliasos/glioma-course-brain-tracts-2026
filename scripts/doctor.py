@@ -111,17 +111,48 @@ def check_deck():
     except ImportError:
         report("WARN", "Deck syntax", "PyYAML not installed; skipped (pip install pyyaml)")
         return
+    keys, surfaces = _panel_keys()
     for d in decks:
         try:
             doc = yaml.safe_load(d.read_text(encoding="utf-8"))
-            layers = set(doc.get("layers", {}))
             names = {s["name"] for s in doc.get("scenes", [])}
-            bad = [n for s in doc.get("scenes", []) for n in s.get("layers", []) if n not in layers]
+            known = set(doc.get("tracts", {}))
+            bad = [k for k in known if keys and k not in keys]                    # catalogue entries with no button
+            for sc in doc.get("scenes", []):
+                bad += [t for t in sc.get("tracts", []) if t not in known]
+                if sc.get("surface") and surfaces and sc["surface"] not in surfaces:
+                    bad.append(sc["surface"])
             bad += [f for f in doc.get("flow", []) if f not in names]
             report("OK" if not bad else "FAIL", f"Deck {d.parent.name}",
                    "consistent" if not bad else f"unknown references: {sorted(set(bad))}")
         except Exception as e:
             report("FAIL", f"Deck {d.parent.name}", str(e))
+
+
+def _panel_keys():
+    """Tract keys and surface names that have a button in gbt/layout.py (read without importing Slicer)."""
+    import importlib.util
+    try:
+        spec = importlib.util.spec_from_file_location("gbt_layout", ROOT / "gbt" / "layout.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        actions = _actions(mod.TABS) + _actions(mod.HEADER) + _actions(getattr(mod, 'FOOTER', []))
+    except Exception:
+        return set(), set()
+    keys = {a.split(":", 1)[1] for a in actions if a.startswith("tract:")}
+    surfaces = {a.split(":", 1)[1] for a in actions if a.startswith("surface:")}
+    return keys, surfaces
+
+
+def _actions(x):
+    """All action strings in a layout structure (TABS sections nested to any depth)."""
+    out = []
+    if isinstance(x, str):
+        return [x] if ":" in x and " " not in x else []
+    if isinstance(x, (list, tuple)):
+        for y in x:
+            out += _actions(y)
+    return out
 
 
 def check_data():

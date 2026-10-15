@@ -16,7 +16,7 @@ AI assistant through MCP. One shared engine, one small deck file per presenter.
 ## Adding your own presentation
 
 1. Copy `presentations/nik/` to `presentations/<your-name>/`.
-2. Edit `deck.yaml`: layers, scenes, flow.
+2. Edit `deck.yaml`: tracts, scenes, flow, caveats. `python scripts/doctor.py` checks it against the panel buttons.
 3. Open a pull request.
 
 Do not commit patient data or large imaging files. Keep them local.

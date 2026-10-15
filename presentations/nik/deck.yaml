@@ -1,69 +1,68 @@
 # presentations/nik/deck.yaml
-# gbt2026 deck for Nik. Draft converted from the previous demo's scene list.
-# Layer ids refer to entries in data/manifest.yaml.
+# The talk script for Nik: which scenes exist, in what order, what to say, and what to credit on the slides.
+# Tract keys are the ones used by the panel buttons (gbt/layout.py, actions "tract:<key>").
+# Run `python scripts/doctor.py` to check that every key and scene name here exists.
 
 title: gbt2026 (Nik)
-default_hemisphere: left        # left | right | both  (say "right" or "both" to override)
-default_view: left
-default_layout: conventional
+default_side: left          # left | right | both  (the Left / Right / Both buttons)
+default_view: left          # camera direction at the start and after "Reset"
 
-# ---------------------------------------------------------------- layers
-layers:
-  cortex_coloured: {source: fsaverage, parcellation: desikan, shade_sulci: true}
-  cortex_glass:    {source: fsaverage, style: glass, opacity: 0.25}
-  cortex_inflated: {source: fsaverage, surface: inflated}
-  gyri_ang_smg:    {source: spl_atlas, labels: [angular, supramarginal], style: highlight}
-  arcuate:         {source: org, tract: arcuate,  sample: display}
-  ifof:            {source: org, tract: ifof,     sample: display}
-  ilf:             {source: org, tract: ilf,      sample: display}
-  slf:             {source: org, tract: slf,      sample: display}
-  splenium:        {source: org, tract: splenium, sample: display}
-  optic_radiation: {source: hcp1065, tract: optic_radiation, color: lime}
-  meyers_loop:     {source: consult, map: meyers_loop, generate_fibres: true, color: pink}
-  t1_slices:       {source: org_t1, style: slice_planes}
+# ---------------------------------------------------------------- what each tract button shows
+# source = where the streamlines come from, note = what to say on the slide when it matters.
+tracts:
+  arcuate:   {label: Arcuate fasciculus,           source: ORG}
+  ifof:      {label: IFOF,                         source: ORG}
+  ilf:       {label: ILF,                          source: ORG}
+  slf1:      {label: SLF I,                        source: ORG}
+  slf2:      {label: SLF II,                       source: ORG}
+  slf3:      {label: SLF III,                      source: ORG}
+  uf:        {label: Uncinate fasciculus,          source: ORG}
+  mdlf:      {label: Middle longitudinal fasciculus, source: ORG}
+  vof:       {label: Vertical occipital fasciculus, source: HCP1065}
+  ec:        {label: External capsule,             source: ORG}
+  cst:       {label: Corticospinal tract,          source: ORG}
+  fstr:      {label: Frontostriatal tract,         source: ORG}
+  ic:        {label: Internal capsule,             source: ORG, note: posterior limb only}
+  cr:        {label: Corona radiata,               source: ORG, note: frontal and parietal parts}
+  splenium:  {label: Splenium of the corpus callosum, source: ORG (CC7)}
+  tapetum:   {label: Tapetum,                      source: derived, note: "not in any atlas; approximated from the lateral fibres of the ORG splenium (CC6/CC7)"}
+  optic:     {label: Optic radiation,              source: HCP1065}
+  meyer:     {label: Meyer's loop,                 source: CONSULT, note: "generated from population probability maps, not measured fibres"}
+  sagittal:  {label: Sagittal stratum,             source: composite, note: "IFOF + ILF + optic radiation shown together; not an atlas tract"}
+  ventricles: {label: Ventricles,                  source: SPL atlas}
+  bg:        {label: Basal ganglia,                source: SPL atlas, note: caudate, putamen, globus pallidus}
+  brainstem: {label: Brainstem,                    source: SPL atlas, note: midbrain, pons, medulla}
 
-# ---------------------------------------------------------------- scenes
+# ---------------------------------------------------------------- scenes (presets for the flow, voice and Claude)
+# surface: gyri | glass | inflated        tracts: keys from above        extra: angular | planes
 scenes:
-  - {name: gyri,        say: ["gyri"],                         layers: [cortex_coloured]}
-  - {name: glass,       say: ["glass brain"],                  layers: [cortex_glass]}
-  - {name: inflated,    say: ["inflated"],                     layers: [cortex_inflated]}
-  - {name: angular_smg, say: ["angular and supramarginal"],    layers: [cortex_glass, gyri_ang_smg]}
-  - {name: arcuate,     say: ["arcuate"],                      layers: [arcuate]}
-  - {name: ifof,        say: ["IFOF"],                         layers: [ifof]}
-  - {name: ilf,         say: ["ILF"],                          layers: [ilf]}
-  - {name: slf,         say: ["SLF"],                          layers: [slf]}
-  - {name: splenium,    say: ["splenium"],                     layers: [splenium]}
-  - {name: optic_radiation, say: ["optic radiation"],          layers: [optic_radiation]}
-  - {name: meyers_loop, say: ["Meyer's loop"],                 layers: [meyers_loop]}
-  - {name: visual_pathway, say: ["visual pathway"],            layers: [cortex_glass, optic_radiation, meyers_loop]}
-  - {name: language,    say: ["language tracts"],              layers: [cortex_glass, arcuate, ifof, ilf]}
-  - {name: all_tracts,  say: ["all tracts"],                   layers: [arcuate, ifof, ilf, slf, splenium]}
-  - {name: wow,         say: ["wow"],                          layers: [cortex_glass, arcuate, ifof, ilf, slf, splenium]}
-  - {name: full,        say: ["full"],                         hemisphere: both,
-                        layers: [cortex_glass, arcuate, ifof, ilf, slf, splenium, t1_slices]}
+  - {name: gyri,      say: ["gyri"],                          surface: gyri}
+  - {name: glass,     say: ["glass brain"],                   surface: glass}
+  - {name: inflated,  say: ["inflated"],                      surface: inflated}
+  - {name: angular,   say: ["angular and supramarginal"],     surface: glass, extra: angular}
+  - {name: arcuate,   say: ["arcuate"],                       tracts: [arcuate]}
+  - {name: ifof,      say: ["IFOF"],                          tracts: [ifof]}
+  - {name: ilf,       say: ["ILF"],                           tracts: [ilf]}
+  - {name: slf,       say: ["SLF"],                           tracts: [slf1, slf2, slf3]}
+  - {name: splenium,  say: ["splenium"],                      tracts: [splenium]}
+  - {name: visual,    say: ["visual pathway"],                surface: glass, tracts: [optic, meyer]}
+  - {name: lang,      say: ["language tracts"],               surface: glass, tracts: [arcuate, ifof, ilf]}
+  - {name: tracts,    say: ["all tracts"],                    tracts: [slf1, slf2, slf3, arcuate, ifof, ilf, splenium]}
+  - {name: wow,       say: ["wow"],                           surface: glass, tracts: [slf1, slf2, slf3, arcuate, ifof, ilf, splenium]}
+  - {name: full,      say: ["full"],                          side: both, surface: glass,
+                      tracts: [slf1, slf2, slf3, arcuate, ifof, ilf, splenium, optic, meyer], extra: planes}
 
-# ---------------------------------------------------------------- camera and layout
-camera:
-  views: [left, right, top, front, back, bottom]   # "look from <view>"
-  spin: true                                       # "spin on" / "spin off"
-  t1_toggle: t1_slices                             # "show the T1" / "hide the T1"
-  glass_opacity: {min: 0.05, max: 0.8, step: 0.05} # "glass more / less transparent" + slider
-layouts: [four_views, 3d_only, conventional]
-
-# ---------------------------------------------------------------- flow
-flow: [gyri, glass, angular_smg, arcuate, ifof, ilf, slf, splenium, visual_pathway, language, wow]  # "next" / "back"
-reset: {layout: conventional, scene: wow, view: left}
-
-# ---------------------------------------------------------------- panel
-panel:
-  title: gbt2026
-  rows: [hemisphere, cortex, tracts, visual, combined, view, layout, flow, opacity]
+# "next" / "back" walk this list; "reset" returns to the first scene of the talk
+flow: [gyri, glass, angular, arcuate, ifof, ilf, slf, splenium, visual, lang, wow]
+reset: {scene: wow, view: left}
 
 # ---------------------------------------------------------------- slide credits and caveats
 caveats:
-  - "White-matter tracts (SLF, arcuate, IFOF, ILF, splenium): ORG atlas, streamlines sampled for display."
-  - "Optic radiation: HCP1065 atlas (Yeh et al.), streamlines ending at about y=-18 mm in MNI."
+  - "White-matter tracts: ORG atlas (Zhang et al.), streamlines sampled for display (100-260 per side), drawn as thin tubes."
+  - "Vertical occipital fasciculus and optic radiation: HCP1065 atlas (Yeh et al.), placed on the ORG brain by the ICBM-to-ORG transform."
   - "Meyer's loop: CONSULT population probability maps (NeuroVault collection 11045); fibres generated from the volume, not measured. Citation and licence not stated on the NeuroVault page."
-  - "Cortex: FreeSurfer fsaverage (population average), fitted to the ORG T1 by bounding box; approximate, not the same brain as the tracts."
-  - "Angular and supramarginal gyri: SPL/NAC atlas, a different brain again; approximate position."
-  - "All atlases fitted to the ORG T1 approximately."
+  - "Tapetum: derived from the lateral fibres of the ORG splenium (CC6/CC7); an approximation, not an atlas tract."
+  - "Sagittal stratum: a composite of IFOF, ILF and optic radiation."
+  - "Internal capsule: ORG posterior limb only."
+  - "Cortex: FreeSurfer fsaverage (population average), scaled x1.076 to the extent of the ORG T1 brain; a different brain from the tracts, so endpoints do not land on exact gyri."
+  - "Ventricles, basal ganglia, brainstem, subject T1 and angular/supramarginal gyri: SPL brain atlas (a single subject), fitted to the ORG space by an affine transform; approximate position."
