@@ -23,6 +23,7 @@ class Controller:
         self.i = -1
         self.spinning = False
         self.planes_on = False
+        self.loading = False         # True while the scene file is being read (drives the scene button colour)
         self.surface = None          # 'glass' | 'gyri' | 'inflated' | None, set by the surface buttons
         self.on = []                 # tract keys switched on with the tract buttons, in order
         self.listeners = []          # callables run after every change, e.g. the panel label
@@ -50,10 +51,15 @@ class Controller:
             print('gbt2026: scene file not found:', path)
             return False
         slicer.util.showStatusMessage('gbt2026: loading scene...', 3000)
+        self.loading = True
+        self._notify()                       # the scene button turns amber ("Loading...")
         slicer.app.processEvents()
-        ok = slicer.util.loadScene(path)
+        try:
+            ok = slicer.util.loadScene(path)
+        finally:
+            self.loading = False
         print('gbt2026: scene', 'loaded' if ok else 'FAILED to load', path)
-        self._notify()
+        self._notify()                       # ... and green when it is done
         return bool(ok)
 
     def reload_scene(self):

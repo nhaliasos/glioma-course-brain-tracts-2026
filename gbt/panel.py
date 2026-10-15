@@ -50,6 +50,21 @@ def build(D):
             btn.setChecked(bool(fn()))
     D.listeners.append(sync)
     D.listeners.append(sync2)
+    scene_btns = []
+
+    def sync_scene():
+        """The scene button shows the state: grey/red = not loaded, amber = loading, green = loaded."""
+        for btn in scene_btns:
+            if D.loading:
+                btn.setText('Loading scene...')
+                btn.setStyleSheet('background:#f9a825;color:black;')
+            elif D.scene_loaded():
+                btn.setText('Scene loaded  \u2713  (click to reload)')
+                btn.setStyleSheet('background:#2e7d32;color:white;')
+            else:
+                btn.setText('Scene NOT loaded - click to load')
+                btn.setStyleSheet('background:#c62828;color:white;')
+    D.listeners.append(sync_scene)
 
     for title, per_row, buttons in layout.SECTIONS:
         if title:
@@ -65,11 +80,14 @@ def build(D):
             if action.startswith('surface:'):
                 b.setCheckable(True)
                 flags[b] = (lambda k: (lambda: D.surface == k))(action.split(':', 1)[1])
+            if action == 'reload':
+                scene_btns.append(b)
             if action == 'toggle:t1':
                 b.setCheckable(True)
                 flags[b] = lambda: D.planes_on
             grid.addWidget(b, i // per_row, i % per_row)
         root.addLayout(grid)
+    sync_scene()
     root.addStretch(1)
     scroll = qt.QScrollArea()
     scroll.setWidgetResizable(True)
