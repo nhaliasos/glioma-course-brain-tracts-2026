@@ -6,6 +6,9 @@ from . import config, controller, panel
 
 def start(repo_root):
     cfg = config.load(repo_root)
+    if not cfg['enabled']:
+        print('gbt2026: disabled in gbt.local.yaml (enabled: false) - not loading the panel')
+        return None
     D = controller.Controller(cfg)
     slicer.gbt = D
     slicer.demo = D            # compatibility alias: existing voice/MCP commands call slicer.demo

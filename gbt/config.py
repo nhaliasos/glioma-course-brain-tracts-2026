@@ -3,6 +3,7 @@ import os
 import re
 
 DEFAULTS = {
+    "enabled": "true",                          # false = Slicer starts normally, no gbt2026 panel
     "scene": "data/scenes/gbt2026_scene.mrb",   # relative to the repo root, or an absolute path
     "autoload_scene": "false",                  # true = load the scene when Slicer starts
 }
@@ -21,6 +22,7 @@ def load(repo_root):
     if not os.path.isabs(scene):
         scene = os.path.join(repo_root, scene)
     cfg["scene_path"] = os.path.normpath(scene)
+    cfg["enabled"] = str(cfg["enabled"]).lower() in ("1", "true", "yes", "on")
     cfg["autoload_scene"] = str(cfg["autoload_scene"]).lower() in ("1", "true", "yes", "on")
     cfg["repo_root"] = repo_root
     return cfg
