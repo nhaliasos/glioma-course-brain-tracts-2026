@@ -164,3 +164,25 @@ def add_spl_structures(repo_root, opacity=0.6):
             d.SetVisibility(False)
             made.append(name)
     return made
+
+
+def fit_freesurfer(scale=1.076, shift=(-0.1, 0.8, 0.2)):
+    """Parent all 'FS ...' surface models to a scaling transform 'FS_to_ORG_fit'.
+
+    The fsaverage pial surface is about 7.6 % smaller than the ORG population-mean brain; matching the
+    brain extent of the ORG T1 (x -65..66, y -104..71, top z 70 mm) gives a uniform scale of 1.076.
+    """
+    try:
+        slicer.mrmlScene.RemoveNode(slicer.util.getNode('FS_to_ORG_fit'))
+    except Exception:
+        pass
+    tf = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLLinearTransformNode', 'FS_to_ORG_fit')
+    m = vtk.vtkMatrix4x4()
+    for i in range(3):
+        m.SetElement(i, i, scale)
+        m.SetElement(i, 3, shift[i])
+    tf.SetMatrixTransformToParent(m)
+    for n in slicer.util.getNodesByClass('vtkMRMLModelNode'):
+        if n.GetName().startswith('FS '):
+            n.SetAndObserveTransformNodeID(tf.GetID())
+    return tf
