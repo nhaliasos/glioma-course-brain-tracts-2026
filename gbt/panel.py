@@ -63,3 +63,30 @@ def build(D):
     w.show()
     w.move(40, 120)
     return w
+
+
+def _show(w):
+    w.show()
+    w.raise_()
+    w.activateWindow()
+
+
+def add_reopen(w):
+    """If the panel is closed by accident, bring it back from the 'gbt2026' menu or with Ctrl+Shift+G."""
+    mw = slicer.util.mainWindow()
+    for attr in ('gbt_menu', 'gbt_shortcut'):          # clean up after a re-run
+        old = getattr(slicer, attr, None)
+        try:
+            if attr == 'gbt_menu' and old is not None:
+                mw.menuBar().removeAction(old.menuAction())
+            if old is not None:
+                old.deleteLater()
+        except Exception:
+            pass
+    menu = mw.menuBar().addMenu('gbt2026')
+    act = menu.addAction('Show panel  (Ctrl+Shift+G)')
+    act.connect('triggered()', lambda: _show(w))
+    sc = qt.QShortcut(qt.QKeySequence('Ctrl+Shift+G'), mw)
+    sc.connect('activated()', lambda: _show(w))
+    slicer.gbt_menu = menu
+    slicer.gbt_shortcut = sc

@@ -15,6 +15,10 @@ def start(repo_root):
     w = panel.build(D)
     slicer.gbt_panel = w
     slicer.demo_panel = w
+    try:
+        panel.add_reopen(w)
+    except Exception as e:      # never let the extra menu stop the panel itself
+        print('gbt2026: could not add the reopen menu:', repr(e))
     if cfg['autoload_scene'] and not D.scene_loaded():
         D.load_scene()
     return D
