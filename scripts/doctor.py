@@ -63,8 +63,8 @@ def find_slicer():
     if platform.system() == "Windows":
         for base in (os.environ.get("LOCALAPPDATA", ""), os.environ.get("ProgramFiles", "")):
             if base:
-                candidates += glob.glob(os.path.join(base, "slicer.org", "Slicer *", "Slicer.exe"))
-                candidates += glob.glob(os.path.join(base, "Slicer *", "Slicer.exe"))
+                candidates += glob.glob(os.path.join(base, "slicer.org", "*Slicer*", "Slicer.exe"))
+                candidates += glob.glob(os.path.join(base, "*Slicer*", "Slicer.exe"))
     else:
         found = shutil.which("Slicer")
         if found:
@@ -78,7 +78,7 @@ def check_slicer():
         report("FAIL", "3D Slicer", "not found in the usual install folders")
         return
     for exe in found:
-        m = re.search(r"Slicer (\d+\.\d+(?:\.\d+)?)", exe)
+        m = re.search(r"Slicer (\d+\.\d+(?:\.\d+)?)", exe)  # e.g. "3D Slicer 5.12.4"
         report("OK", "3D Slicer", f"{exe}" + (f" (version {m.group(1)})" if m else ""))
     if len(found) > 1:
         report("WARN", "3D Slicer", "several versions installed; make sure you launch the one you rehearsed with")
