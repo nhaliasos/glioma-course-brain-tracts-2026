@@ -186,3 +186,16 @@ def fit_freesurfer(scale=1.076, shift=(-0.1, 0.8, 0.2)):
         if n.GetName().startswith('FS '):
             n.SetAndObserveTransformNodeID(tf.GetID())
     return tf
+
+
+# Tract colours: the first group are the long-standing course colours, the rest were chosen to be
+# clearly different from them and from each other (all models of a tract share its colour, left and right).
+TRACT_COLORS = {
+    'Arcuate': (1.0, 0.55, 0.0), 'IFOF': (0.0, 0.85, 0.85), 'ILF': (1.0, 0.9, 0.1),
+    'Splenium': (1.0, 0.15, 0.15), 'Optic radiation': (0.6, 1.0, 0.2), "Meyer's loop": (1.0, 0.45, 0.65),
+    'SLF I': (0.15, 0.8, 0.15), 'SLF II': (0.1, 0.1, 0.95), 'SLF III': (0.9, 0.3, 0.9),
+    'Uncinate': (0.55, 0.25, 0.85), 'MdLF': (0.6, 0.38, 0.18), 'VOF': (1.0, 0.6, 0.55),
+    'External capsule': (0.0, 0.55, 0.45), 'Corticospinal': (0.95, 0.95, 0.95),
+    'Frontostriatal': (0.55, 0.05, 0.2), 'Internal capsule': (0.6, 0.6, 0.68),
+    'Corona radiata': (0.45, 0.75, 1.0), 'Tapetum': (0.5, 0.5, 0.0),
+}

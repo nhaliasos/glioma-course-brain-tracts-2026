@@ -59,6 +59,9 @@ class Controller:
         finally:
             self.loading = False
         print('gbt2026: scene', 'loaded' if ok else 'FAILED to load', path)
+        if ok:
+            self.planes(False)               # a freshly loaded scene starts clean: no slice planes, nothing shown
+            self.hide_all()
         self._notify()                       # ... and green when it is done
         return bool(ok)
 
