@@ -168,8 +168,23 @@ class Controller:
     def toggle_spin(self):
         self.spin(not self.spinning)
 
+    T1 = 'SPL_MRI'      # single-subject T1 shown by the T1 button (the ORG population-mean T1 is not used)
+
     def toggle_planes(self):
         self.planes(not self.planes_on)
+
+    def toggle_t1(self):
+        """Show / hide the T1 slice planes in the 3D view (always the subject T1)."""
+        on = not self.planes_on
+        if on:
+            try:
+                vid = slicer.util.getNode(self.T1).GetID()
+                for c in slicer.util.getNodesByClass('vtkMRMLSliceCompositeNode'):
+                    c.SetBackgroundVolumeID(vid)
+            except Exception as e:
+                print('gbt2026: T1 volume not found:', repr(e))
+        self.planes(on)
+        self._notify()
 
     def layout(self, k):
         L = slicer.vtkMRMLLayoutNode
@@ -278,7 +293,7 @@ class Controller:
         elif kind == 'flow':
             {'next': self.next, 'back': self.back, 'reset': self.reset}[arg]()
         elif kind == 'toggle':
-            {'spin': self.toggle_spin, 'planes': self.toggle_planes}[arg]()
+            {'spin': self.toggle_spin, 'planes': self.toggle_planes, 't1': self.toggle_t1}[arg]()
         else:
             raise ValueError('unknown action: %r' % action)
 

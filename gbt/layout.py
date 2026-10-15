@@ -11,7 +11,7 @@ Actions (the same words a keyboard shortcut or a voice command will use later):
     look:<left|right|top|front|back|bottom>   camera direction
     layout:<3d|4|conv>            Slicer window layout
     flow:<next|back|reset>        step through the talk / return to the start
-    toggle:<spin|planes>          rotate the brain / show the T1 slice planes
+    toggle:<spin|planes|t1>          rotate the brain / show the T1 slice planes
 """
 
 SECTIONS = [
@@ -32,4 +32,5 @@ SECTIONS = [
     ("VISUAL", 2, [("Optic radiation", "tract:optic"), ("Meyer's loop", "tract:meyer")]),
     ("SAGITTAL", 1, [("Sagittal stratum", "tract:sagittal")]),
     ("", 1, [("Clear all tracts", "tract:clear")]),
+    ("BRAIN", 1, [("T1 slices", "toggle:t1")]),
 ]

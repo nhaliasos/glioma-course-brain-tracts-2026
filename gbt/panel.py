@@ -41,7 +41,13 @@ def build(D):
     def sync():
         for key, btn in toggles.items():
             btn.setChecked(key in D.on)
+    flags = {}                       # button -> function telling whether it is "on"
+
+    def sync2():
+        for btn, fn in flags.items():
+            btn.setChecked(bool(fn()))
     D.listeners.append(sync)
+    D.listeners.append(sync2)
 
     for title, per_row, buttons in layout.SECTIONS:
         if title:
@@ -54,6 +60,9 @@ def build(D):
             if action.startswith('tract:') and action != 'tract:clear':
                 b.setCheckable(True)
                 toggles[action.split(':', 1)[1]] = b
+            if action == 'toggle:t1':
+                b.setCheckable(True)
+                flags[b] = lambda: D.planes_on
             grid.addWidget(b, i // per_row, i % per_row)
         root.addLayout(grid)
     root.addStretch(1)
