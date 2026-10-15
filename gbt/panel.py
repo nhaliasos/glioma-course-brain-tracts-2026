@@ -12,15 +12,17 @@ def build(D):
         except Exception:
             pass
     width = int(D.cfg.get('panel_width', 240))
-    w = qt.QWidget()
+    w = qt.QWidget()                       # outer window: fixed width, never taller than the screen
     w.setWindowTitle('gbt2026')
     w.setWindowFlags(qt.Qt.Tool | qt.Qt.WindowStaysOnTopHint)
     w.setFixedWidth(width)
-    w.setStyleSheet('QPushButton{font-size:12px;min-height:28px;padding:1px 6px;} '
+    inner = qt.QWidget()                   # all the buttons live here, inside a scroll area
+    w.setStyleSheet('QPushButton{font-size:11px;min-height:22px;padding:0px 4px;} '
                     'QPushButton:checked{background:#2e7d32;color:white;} '
-                    'QLabel{font-weight:bold;font-size:11px;color:#444;}')
-    root = qt.QVBoxLayout(w)
-    root.setSpacing(3)
+                    'QLabel{font-weight:bold;font-size:10px;color:#444;}')
+    root = qt.QVBoxLayout(inner)
+    root.setSpacing(2)
+    root.setContentsMargins(4, 2, 4, 2)
 
     def run(action):
         def go():
@@ -53,7 +55,7 @@ def build(D):
         if title:
             root.addWidget(qt.QLabel(title))
         grid = qt.QGridLayout()
-        grid.setSpacing(3)
+        grid.setSpacing(2)
         for i, (label, action) in enumerate(buttons):
             b = qt.QPushButton(label)
             b.connect('clicked()', run(action))
@@ -69,9 +71,22 @@ def build(D):
             grid.addWidget(b, i // per_row, i % per_row)
         root.addLayout(grid)
     root.addStretch(1)
+    scroll = qt.QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(qt.QFrame.NoFrame)
+    scroll.setHorizontalScrollBarPolicy(qt.Qt.ScrollBarAlwaysOff)
+    scroll.setWidget(inner)
+    outer = qt.QVBoxLayout(w)
+    outer.setContentsMargins(0, 0, 0, 0)
+    outer.addWidget(scroll)
+    avail = qt.QApplication.desktop().availableGeometry(slicer.util.mainWindow()).height()
+    want = inner.sizeHint.height() + 4
+    w.resize(width, max(200, min(want, avail - 60)))   # scrolls if the screen is too short
     w.show()
-    w.move(40, 120)
-    w.adjustSize()
+    qt.QApplication.processEvents()
+    want = inner.sizeHint.height() + 4           # sizes are only final once the window is shown
+    w.resize(width, max(200, min(want, avail - 60)))
+    w.move(20, 20)
     return w
 
 
