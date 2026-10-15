@@ -1,0 +1,11 @@
+# Downloaded data and machine-specific settings stay out of Git
+data/*
+!data/manifest.yaml
+!data/.gitkeep
+gbt.local.yaml
+
+# Python / OS noise
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
