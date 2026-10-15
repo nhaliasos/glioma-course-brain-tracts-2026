@@ -20,5 +20,7 @@ def start(repo_root):
     except Exception as e:      # never let the extra menu stop the panel itself
         print('gbt2026: could not add the reopen menu:', repr(e))
     if cfg['autoload_scene'] and not D.scene_loaded():
-        D.load_scene()
+        # a moment after startup, so Slicer's window is up and the panel is visible while the scene loads
+        import qt
+        qt.QTimer.singleShot(1500, lambda: None if D.scene_loaded() else D.load_scene())
     return D

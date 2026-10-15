@@ -6,7 +6,7 @@ DEFAULTS = {
     "enabled": "true",                          # false = Slicer starts normally, no gbt2026 panel
     "scene": "data/scenes/gbt2026_scene.mrb",   # relative to the repo root, or an absolute path
     "panel_width": "240",                       # width of the button panel in pixels
-    "autoload_scene": "false",                  # true = load the scene when Slicer starts
+    "autoload_scene": "true",                   # true = load the scene when Slicer starts
 }
 
 

@@ -56,6 +56,19 @@ class Controller:
         self._notify()
         return bool(ok)
 
+    def reload_scene(self):
+        """Recovery button: throw the scene away, load it again from the file, reset all button states."""
+        path = self.cfg.get('scene_path')
+        if not path or not os.path.exists(path):
+            print('gbt2026: scene file not found:', path)
+            return False
+        self.spin(False)
+        self.on, self.surface, self.cur, self.planes_on = [], None, None, False
+        slicer.util.showStatusMessage('gbt2026: reloading scene...', 5000)
+        slicer.mrmlScene.Clear(0)
+        slicer.app.processEvents()
+        return self.load_scene(path)
+
     def status(self):
         if not self.scene_loaded():
             return 'Scene not loaded'
@@ -308,6 +321,8 @@ class Controller:
         kind, _, arg = action.partition(':')
         if kind == 'load':
             self.load_scene()
+        elif kind == 'reload':
+            self.reload_scene()
         elif kind == 'scene':
             self.scene(arg)
         elif kind == 'surface':

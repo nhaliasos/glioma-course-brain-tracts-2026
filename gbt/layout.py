@@ -3,7 +3,8 @@
 Each section is:  (title, buttons_per_row, [(button label, action), ...])
 
 Actions (the same words a keyboard shortcut or a voice command will use later):
-    load                          load the scene file
+    load                          load the scene file (it also loads by itself at startup)
+    reload                        recovery: clear everything and load the scene file again
     tract:<name>                  toggle a tract on/off (adds to what is shown); tract:clear removes all
     scene:<name>                  gyri, glass, inflated, angular, slf, arcuate, ifof, ilf, splenium, tapetum,
                                   uf, mdlf, vof, ec, ic, cr, cst, fstr, sagittal, optic, meyer, visual, lang, tracts, wow, full
@@ -17,7 +18,7 @@ Actions (the same words a keyboard shortcut or a voice command will use later):
 """
 
 SECTIONS = [
-    ("SCENE FILE", 1, [("Load scene", "load")]),
+    ("SCENE FILE", 1, [("Reload scene", "reload")]),
     ("HEMISPHERE", 3, [("Left", "side:left"), ("Right", "side:right"), ("Both", "side:both")]),
     ("ASSOCIATION", 2, [
         ("Arcuate", "tract:arcuate"), ("IFOF", "tract:ifof"),
