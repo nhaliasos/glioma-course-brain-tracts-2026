@@ -5,6 +5,7 @@ import re
 DEFAULTS = {
     "enabled": "true",                          # false = Slicer starts normally, no gbt2026 panel
     "scene": "data/scenes/gbt2026_scene.mrb",   # relative to the repo root, or an absolute path
+    "panel_width": "240",                       # width of the button panel in pixels
     "autoload_scene": "false",                  # true = load the scene when Slicer starts
 }
 
@@ -24,5 +25,9 @@ def load(repo_root):
     cfg["scene_path"] = os.path.normpath(scene)
     cfg["enabled"] = str(cfg["enabled"]).lower() in ("1", "true", "yes", "on")
     cfg["autoload_scene"] = str(cfg["autoload_scene"]).lower() in ("1", "true", "yes", "on")
+    try:
+        cfg["panel_width"] = int(cfg["panel_width"])
+    except ValueError:
+        cfg["panel_width"] = 240
     cfg["repo_root"] = repo_root
     return cfg

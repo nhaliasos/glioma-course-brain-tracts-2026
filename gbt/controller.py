@@ -8,7 +8,9 @@ import vtk  # noqa: F401  (kept: some scene operations rely on it being imported
 
 class Controller:
     TR = {'slf': ['SLF I', 'SLF II', 'SLF III'], 'arcuate': ['Arcuate'], 'ifof': ['IFOF'], 'ilf': ['ILF'],
-          'optic': ['Optic radiation'], 'meyer': ["Meyer's loop"]}
+          'optic': ['Optic radiation'], 'meyer': ["Meyer's loop"],
+          'uf': ['Uncinate'], 'mdlf': ['MdLF'], 'ec': ['External capsule'], 'ic': ['Internal capsule'],
+          'cr': ['Corona radiata (frontal)', 'Corona radiata (parietal)'], 'vof': ['VOF']}
     SEQ = ['gyri', 'glass', 'angular', 'arcuate', 'ifof', 'ilf', 'slf', 'splenium', 'visual', 'lang', 'wow']
     # a model of this name must exist, otherwise the scene is not the expected one
     PROBE = 'FS glass left'
@@ -60,6 +62,8 @@ class Controller:
     def names(self, key, side):
         if key == 'splenium':
             return ['Splenium (CC7)']
+        if key == 'tapetum':
+            return ['Tapetum (%s, derived)' % side]
         out = []
         for b in self.TR[key]:
             out.append(b + (' (clean)' if side == 'left' else ' (right)') if key == 'slf' else b + ' (%s)' % side)
@@ -68,7 +72,8 @@ class Controller:
     # ---- visibility ----------------------------------------------------
     def hide_all(self):
         for nm, n in self.models().items():
-            if nm.startswith(('SLF', 'Arcuate', 'IFOF', 'ILF', 'Splen', 'FS ', 'Optic', "Meyer")) and n.GetDisplayNode():
+            if nm.startswith(('SLF', 'Arcuate', 'IFOF', 'ILF', 'Splen', 'FS ', 'Optic', "Meyer",
+                               'Uncinate', 'MdLF', 'External capsule', 'Internal capsule', 'Corona radiata', 'VOF', 'Tapetum')) and n.GetDisplayNode():
                 n.GetDisplayNode().SetVisibility(False)
         for n in slicer.util.getNodesByClass('vtkMRMLFiberBundleNode'):
             for i in range(n.GetNumberOfDisplayNodes()):
@@ -210,6 +215,27 @@ class Controller:
         self.i = -1
         self.scene('wow')
         self.look('left')
+
+    # ---- one entry point for every kind of control ---------------------
+    def do(self, action):
+        """Run an action word such as 'scene:wow', 'look:left' or 'flow:next' (see gbt/layout.py)."""
+        kind, _, arg = action.partition(':')
+        if kind == 'load':
+            self.load_scene()
+        elif kind == 'scene':
+            self.scene(arg)
+        elif kind == 'side':
+            self.setside(arg)
+        elif kind == 'look':
+            self.look(arg)
+        elif kind == 'layout':
+            self.layout(arg)
+        elif kind == 'flow':
+            {'next': self.next, 'back': self.back, 'reset': self.reset}[arg]()
+        elif kind == 'toggle':
+            {'spin': self.toggle_spin, 'planes': self.toggle_planes}[arg]()
+        else:
+            raise ValueError('unknown action: %r' % action)
 
 
 Demo = Controller   # old name, kept so existing code and voice/MCP commands keep working
