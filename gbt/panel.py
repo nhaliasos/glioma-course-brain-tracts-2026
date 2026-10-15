@@ -16,13 +16,9 @@ def build(D):
     w.setWindowTitle('gbt2026')
     w.setWindowFlags(qt.Qt.Tool | qt.Qt.WindowStaysOnTopHint)
     w.setFixedWidth(width)
-    inner = qt.QWidget()                   # all the buttons live here, inside a scroll area
     w.setStyleSheet('QPushButton{font-size:11px;min-height:22px;padding:0px 4px;} '
                     'QPushButton:checked{background:#2e7d32;color:white;} '
                     'QLabel{font-weight:bold;font-size:10px;color:#444;}')
-    root = qt.QVBoxLayout(inner)
-    root.setSpacing(2)
-    root.setContentsMargins(4, 2, 4, 2)
 
     def run(action):
         def go():
@@ -34,26 +30,28 @@ def build(D):
 
     status = qt.QLabel('')
     status.setWordWrap(True)
-    root.addWidget(status)
     D.listeners.append(lambda: status.setText(D.status()))
     status.setText(D.status())
 
     toggles = {}                     # tract key -> button, so the checked state follows D.on
+    flags = {}                       # button -> function telling whether it is "on"
+    sliders = {}                     # opacity group -> slider
+    scene_btns = []
 
     def sync():
         for key, btn in toggles.items():
             btn.setChecked(key in D.on)
-    flags = {}                       # button -> function telling whether it is "on"
-
-    def sync2():
         for btn, fn in flags.items():
             btn.setChecked(bool(fn()))
-    D.listeners.append(sync)
-    D.listeners.append(sync2)
-    scene_btns = []
+        for grp, (sl, lab) in sliders.items():
+            v = D.get_opacity(grp, sl.value / 100.0)
+            sl.blockSignals(True)
+            sl.setValue(int(round(v * 100)))
+            sl.blockSignals(False)
+            lab.setText('%d%%' % int(round(v * 100)))
 
     def sync_scene():
-        """The scene button shows the state: grey/red = not loaded, amber = loading, green = loaded."""
+        """The scene button shows the state: red = not loaded, amber = loading, green = loaded."""
         for btn in scene_btns:
             if D.loading:
                 btn.setText('Loading scene...')
@@ -64,46 +62,85 @@ def build(D):
             else:
                 btn.setText('Scene NOT loaded - click to load')
                 btn.setStyleSheet('background:#c62828;color:white;')
+    D.listeners.append(sync)
     D.listeners.append(sync_scene)
 
-    for title, per_row, buttons in layout.SECTIONS:
-        if title:
-            root.addWidget(qt.QLabel(title))
-        grid = qt.QGridLayout()
-        grid.setSpacing(2)
-        for i, (label, action) in enumerate(buttons):
-            b = qt.QPushButton(label)
-            b.connect('clicked()', run(action))
-            if action.startswith('tract:') and action != 'tract:clear':
-                b.setCheckable(True)
-                toggles[action.split(':', 1)[1]] = b
-            if action.startswith('surface:'):
-                b.setCheckable(True)
-                flags[b] = (lambda k: (lambda: D.surface == k))(action.split(':', 1)[1])
-            if action == 'reload':
-                scene_btns.append(b)
-            if action == 'toggle:t1':
-                b.setCheckable(True)
-                flags[b] = lambda: D.planes_on
-            grid.addWidget(b, i // per_row, i % per_row)
-        root.addLayout(grid)
-    sync_scene()
-    root.addStretch(1)
-    scroll = qt.QScrollArea()
-    scroll.setWidgetResizable(True)
-    scroll.setFrameShape(qt.QFrame.NoFrame)
-    scroll.setHorizontalScrollBarPolicy(qt.Qt.ScrollBarAlwaysOff)
-    scroll.setWidget(inner)
+    def add_sections(root, sections):
+        for title, per_row, items in sections:
+            if title:
+                root.addWidget(qt.QLabel(title))
+            if per_row == 'sliders':
+                for label, grp, lo, hi in items:
+                    row = qt.QHBoxLayout()
+                    name = qt.QLabel(label)
+                    name.setFixedWidth(70)
+                    sl = qt.QSlider(qt.Qt.Horizontal)
+                    sl.setRange(int(lo * 100), int(hi * 100))
+                    val = qt.QLabel('')
+                    val.setFixedWidth(34)
+                    def moved(v, g=grp, lab=val):
+                        lab.setText('%d%%' % v)                  # show the number while dragging
+                        D.do('opacity:%s:%.2f' % (g, v / 100.0))
+                    sl.connect('valueChanged(int)', moved)
+                    sliders[grp] = (sl, val)
+                    row.addWidget(name)
+                    row.addWidget(sl)
+                    row.addWidget(val)
+                    root.addLayout(row)
+                continue
+            grid = qt.QGridLayout()
+            grid.setSpacing(2)
+            for i, (label, action) in enumerate(items):
+                b = qt.QPushButton(label)
+                b.connect('clicked()', run(action))
+                if action.startswith('tract:') and action != 'tract:clear':
+                    b.setCheckable(True)
+                    toggles[action.split(':', 1)[1]] = b
+                if action.startswith('surface:'):
+                    b.setCheckable(True)
+                    flags[b] = (lambda k: (lambda: D.surface == k))(action.split(':', 1)[1])
+                if action == 'reload':
+                    scene_btns.append(b)
+                if action == 'toggle:t1':
+                    b.setCheckable(True)
+                    flags[b] = lambda: D.planes_on
+                if action == 'toggle:spin':
+                    b.setCheckable(True)
+                    flags[b] = lambda: D.spinning
+                grid.addWidget(b, i // per_row, i % per_row)
+            root.addLayout(grid)
+
     outer = qt.QVBoxLayout(w)
-    outer.setContentsMargins(0, 0, 0, 0)
-    outer.addWidget(scroll)
+    outer.setSpacing(2)
+    outer.setContentsMargins(4, 2, 4, 2)
+    add_sections(outer, layout.HEADER)
+    outer.insertWidget(0, status)
+    tabs = qt.QTabWidget()
+    pages = []
+    for name, sections in layout.TABS:
+        inner = qt.QWidget()
+        col = qt.QVBoxLayout(inner)
+        col.setSpacing(2)
+        col.setContentsMargins(2, 2, 2, 2)
+        add_sections(col, sections)
+        col.addStretch(1)
+        scroll = qt.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(qt.QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(qt.Qt.ScrollBarAlwaysOff)
+        scroll.setWidget(inner)
+        tabs.addTab(scroll, name)
+        pages.append(inner)
+    outer.addWidget(tabs)
+    add_sections(outer, layout.FOOTER)
+    sync()
+    sync_scene()
     avail = qt.QApplication.desktop().availableGeometry(slicer.util.mainWindow()).height()
-    want = inner.sizeHint.height() + 4
-    w.resize(width, max(200, min(want, avail - 60)))   # scrolls if the screen is too short
     w.show()
-    qt.QApplication.processEvents()
-    want = inner.sizeHint.height() + 4           # sizes are only final once the window is shown
-    w.resize(width, max(200, min(want, avail - 60)))
+    qt.QApplication.processEvents()                    # sizes are only final once the window is shown
+    head = w.sizeHint.height() - tabs.sizeHint.height()
+    want = head + max(p.sizeHint.height() for p in pages) + 40
+    w.resize(width, max(200, min(want, avail - 60)))   # the tab scrolls if the screen is too short
     w.move(20, 20)
     return w
 

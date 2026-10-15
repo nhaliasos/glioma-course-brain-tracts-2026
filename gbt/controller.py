@@ -116,6 +116,7 @@ class Controller:
                       'External capsule', 'Internal capsule', 'Corona radiata', 'VOF', 'Tapetum',
                       'Corticospinal', 'Frontostriatal',
                       'Ventricles', 'Basal ganglia', 'Brainstem')
+    DEEP_PREFIXES = ('Ventricles', 'Basal ganglia', 'Brainstem')
     GROUPS = {'sagittal': ['ifof', 'ilf', 'optic']}      # composite buttons
 
     def hide_tracts(self):
@@ -236,6 +237,28 @@ class Controller:
             {'3d': L.SlicerLayoutOneUp3DView, '4': L.SlicerLayoutFourUpView,
              'conv': L.SlicerLayoutConventionalView}[k])
 
+    def _opacity_models(self, group):
+        for nm, n in self.models().items():
+            if not n.GetDisplayNode() or nm.endswith('(volume)'):
+                continue
+            if group == 'surface' and nm.startswith('FS '):
+                yield n
+            elif group == 'deep' and nm.startswith(self.DEEP_PREFIXES):
+                yield n
+            elif group == 'tracts' and nm.startswith(self.TRACT_PREFIXES) and not nm.startswith(self.DEEP_PREFIXES):
+                yield n
+
+    def set_opacity(self, group, v):
+        v = max(0.0, min(1.0, float(v)))
+        for n in self._opacity_models(group):
+            n.GetDisplayNode().SetOpacity(v)
+        slicer.app.layoutManager().threeDWidget(0).threeDView().forceRender()
+
+    def get_opacity(self, group, default=1.0):
+        for n in self._opacity_models(group):
+            return n.GetDisplayNode().GetOpacity()
+        return default
+
     def glass_opacity(self, v):
         m = self.models()
         for sd in ('left', 'right'):
@@ -333,6 +356,9 @@ class Controller:
             self.scene(arg)
         elif kind == 'surface':
             self.set_surface(arg)
+        elif kind == 'opacity':
+            grp, _, val = arg.partition(':')
+            self.set_opacity(grp, val)
         elif kind == 'tract':
             self.clear_tracts() if arg == 'clear' else self.toggle_tract(arg)
         elif kind == 'side':
