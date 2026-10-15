@@ -189,7 +189,10 @@ class Controller:
             self.tracts(allt)
         elif name == 'full':
             self.surf('glass'); self.tracts(allt + ['optic', 'meyer'], 'both'); self.planes(True)
-        elif name in self.TR or name == 'splenium':
+        elif name == 'sagittal':
+            # composite, not an anatomical atlas entity: IFOF + ILF + optic radiation
+            self.surf('glass'); self.tracts(['ifof', 'ilf', 'optic'])
+        elif name in self.TR or name in ('splenium', 'tapetum'):
             self.tracts([name])
         slicer.app.layoutManager().threeDWidget(0).threeDView().forceRender()
         self._notify()
