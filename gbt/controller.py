@@ -142,9 +142,18 @@ class Controller:
             for sd in sides:
                 self.vis(self.names(k, sd))
 
-    def surf(self, kind):
+    def surf(self, kind, side='both'):
         nm = {'glass': 'FS glass', 'gyri': 'FS cortex', 'inflated': 'FS inflated'}[kind]
-        self.vis([nm + ' left', nm + ' right'])
+        self.vis([nm + ' left', nm + ' right'] if side == 'both' else [nm + ' ' + side])
+
+    def apply_surface(self):
+        """Show the chosen brain surface on the chosen hemisphere(s)."""
+        for nm, n in self.models().items():
+            if nm.startswith('FS ') and n.GetDisplayNode():
+                n.GetDisplayNode().SetVisibility(False)
+        if self.surface:
+            self.surf(self.surface, self.side)
+        slicer.app.layoutManager().threeDWidget(0).threeDView().forceRender()
 
     def set_surface(self, kind):
         """Surface buttons: one brain surface at a time; pressing the active one switches it off."""
@@ -152,12 +161,7 @@ class Controller:
             print('gbt2026: scene not loaded - press "Load scene" first')
             return self._notify()
         self.surface = None if self.surface == kind else kind
-        for nm, n in self.models().items():
-            if nm.startswith('FS ') and n.GetDisplayNode():
-                n.GetDisplayNode().SetVisibility(False)
-        if self.surface:
-            self.surf(self.surface)
-        slicer.app.layoutManager().threeDWidget(0).threeDView().forceRender()
+        self.apply_surface()
         self._notify()
 
     def planes(self, on):
@@ -274,9 +278,11 @@ class Controller:
 
     def setside(self, s):
         self.side = s
+        if self.surface:
+            self.apply_surface()
         if self.on:
             self.refresh_tracts()
-        elif self.cur:
+        elif self.cur and not self.surface:
             self.scene(self.cur)
         else:
             self._notify()
