@@ -288,6 +288,8 @@ class Controller:
             self.setside(arg)
         elif kind == 'look':
             self.look(arg)
+        elif kind == 'view' and arg == 'reset':
+            self.look('left')            # straight side view, re-centred and re-zoomed
         elif kind == 'layout':
             self.layout(arg)
         elif kind == 'flow':

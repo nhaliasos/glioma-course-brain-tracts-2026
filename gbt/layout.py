@@ -8,6 +8,7 @@ Actions (the same words a keyboard shortcut or a voice command will use later):
     scene:<name>                  gyri, glass, inflated, angular, slf, arcuate, ifof, ilf, splenium, tapetum,
                                   uf, mdlf, vof, ec, ic, cr, cst, fstr, sagittal, optic, meyer, visual, lang, tracts, wow, full
     side:<left|right|both>        which hemisphere the tracts are shown on
+    view:reset                    back to a straight side view, centred
     look:<left|right|top|front|back|bottom>   camera direction
     layout:<3d|4|conv>            Slicer window layout
     flow:<next|back|reset>        step through the talk / return to the start
@@ -32,5 +33,5 @@ SECTIONS = [
     ("VISUAL", 2, [("Optic radiation", "tract:optic"), ("Meyer's loop", "tract:meyer")]),
     ("SAGITTAL", 1, [("Sagittal stratum", "tract:sagittal")]),
     ("", 1, [("Clear all tracts", "tract:clear")]),
-    ("BRAIN", 1, [("T1 slices", "toggle:t1")]),
+    ("BRAIN", 2, [("T1 slices", "toggle:t1"), ("Reset 3D view", "view:reset")]),
 ]
