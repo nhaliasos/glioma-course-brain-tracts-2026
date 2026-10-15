@@ -27,10 +27,8 @@ SECTIONS = [
         ("Corticospinal", "tract:cst"), ("Frontostriatal", "tract:fstr"),
         ("Internal capsule", "tract:ic"), ("Corona radiata", "tract:cr"),
     ]),
-    ("COMMISSURAL", 2, [("Splenium", "tract:splenium"), ("Tapetum (derived)", "tract:tapetum")]),
-    ("VISUAL", 2, [
-        ("Optic radiation", "tract:optic"), ("Meyer's loop", "tract:meyer"),
-        ("Sagittal stratum (composite)", "tract:sagittal"),
-    ]),
+    ("COMMISSURAL", 2, [("Splenium", "tract:splenium"), ("Tapetum", "tract:tapetum")]),
+    ("VISUAL", 2, [("Optic radiation", "tract:optic"), ("Meyer's loop", "tract:meyer")]),
+    ("SAGITTAL", 1, [("Sagittal stratum", "tract:sagittal")]),
     ("", 1, [("Clear all tracts", "tract:clear")]),
 ]

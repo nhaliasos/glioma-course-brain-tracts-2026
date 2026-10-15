@@ -17,7 +17,7 @@ def build(D):
     w.setWindowFlags(qt.Qt.Tool | qt.Qt.WindowStaysOnTopHint)
     w.setFixedWidth(width)
     w.setStyleSheet('QPushButton{font-size:12px;min-height:28px;padding:1px 6px;} '
-                    'QPushButton:checked{background:#2e7d32;color:white;font-weight:bold;} '
+                    'QPushButton:checked{background:#2e7d32;color:white;} '
                     'QLabel{font-weight:bold;font-size:11px;color:#444;}')
     root = qt.QVBoxLayout(w)
     root.setSpacing(3)
