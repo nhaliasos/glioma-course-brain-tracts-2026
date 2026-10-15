@@ -17,6 +17,7 @@ def build(D):
     w.setWindowFlags(qt.Qt.Tool | qt.Qt.WindowStaysOnTopHint)
     w.setFixedWidth(width)
     w.setStyleSheet('QPushButton{font-size:12px;min-height:28px;padding:1px 6px;} '
+                    'QPushButton:checked{background:#2e7d32;color:white;font-weight:bold;} '
                     'QLabel{font-weight:bold;font-size:11px;color:#444;}')
     root = qt.QVBoxLayout(w)
     root.setSpacing(3)
@@ -35,13 +36,24 @@ def build(D):
     D.listeners.append(lambda: status.setText(D.status()))
     status.setText(D.status())
 
+    toggles = {}                     # tract key -> button, so the checked state follows D.on
+
+    def sync():
+        for key, btn in toggles.items():
+            btn.setChecked(key in D.on)
+    D.listeners.append(sync)
+
     for title, per_row, buttons in layout.SECTIONS:
-        root.addWidget(qt.QLabel(title))
+        if title:
+            root.addWidget(qt.QLabel(title))
         grid = qt.QGridLayout()
         grid.setSpacing(3)
         for i, (label, action) in enumerate(buttons):
             b = qt.QPushButton(label)
             b.connect('clicked()', run(action))
+            if action.startswith('tract:') and action != 'tract:clear':
+                b.setCheckable(True)
+                toggles[action.split(':', 1)[1]] = b
             grid.addWidget(b, i // per_row, i % per_row)
         root.addLayout(grid)
     root.addStretch(1)

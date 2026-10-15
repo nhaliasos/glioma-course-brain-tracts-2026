@@ -23,6 +23,7 @@ class Controller:
         self.i = -1
         self.spinning = False
         self.planes_on = False
+        self.on = []                 # tract keys switched on with the tract buttons, in order
         self.listeners = []          # callables run after every change, e.g. the panel label
 
     # ---- housekeeping -------------------------------------------------
@@ -57,6 +58,8 @@ class Controller:
     def status(self):
         if not self.scene_loaded():
             return 'Scene not loaded'
+        if self.on:
+            return 'Tracts: %s (%s)' % (', '.join(self.on), self.side)
         return 'Showing: %s (%s)' % (self.cur or '-', self.side)
 
     # ---- name tables ---------------------------------------------------
@@ -83,6 +86,41 @@ class Controller:
             slicer.util.getNode('SPL cortex').GetDisplayNode().SetVisibility3D(False)
         except Exception:
             pass
+
+    TRACT_PREFIXES = ('SLF', 'Arcuate', 'IFOF', 'ILF', 'Splen', 'Optic', "Meyer", 'Uncinate', 'MdLF',
+                      'External capsule', 'Internal capsule', 'Corona radiata', 'VOF', 'Tapetum',
+                      'Corticospinal', 'Frontostriatal')
+    GROUPS = {'sagittal': ['ifof', 'ilf', 'optic']}      # composite buttons
+
+    def hide_tracts(self):
+        for nm, n in self.models().items():
+            if nm.startswith(self.TRACT_PREFIXES) and n.GetDisplayNode():
+                n.GetDisplayNode().SetVisibility(False)
+        for n in slicer.util.getNodesByClass('vtkMRMLFiberBundleNode'):
+            for i in range(n.GetNumberOfDisplayNodes()):
+                n.GetNthDisplayNode(i).SetVisibility(False)
+
+    def refresh_tracts(self):
+        """Show exactly the tracts in self.on on the chosen hemisphere. Brain surfaces are left alone."""
+        self.hide_tracts()
+        for k in self.on:
+            self.tracts(self.GROUPS.get(k, [k]))
+        slicer.app.layoutManager().threeDWidget(0).threeDView().forceRender()
+        self._notify()
+
+    def toggle_tract(self, key):
+        if not self.scene_loaded():
+            print('gbt2026: scene not loaded - press "Load scene" first')
+            return self._notify()
+        if key in self.on:
+            self.on.remove(key)
+        else:
+            self.on.append(key)
+        self.refresh_tracts()
+
+    def clear_tracts(self):
+        self.on = []
+        self.refresh_tracts()
 
     def vis(self, names, on=True):
         m = self.models()
@@ -167,6 +205,7 @@ class Controller:
         if side:
             self.side = side
         self.cur = name
+        self.on = []
         self.hide_all()
         self.planes(False)
         self.frame(False)
@@ -200,7 +239,9 @@ class Controller:
 
     def setside(self, s):
         self.side = s
-        if self.cur:
+        if self.on:
+            self.refresh_tracts()
+        elif self.cur:
             self.scene(self.cur)
         else:
             self._notify()
@@ -228,6 +269,8 @@ class Controller:
             self.load_scene()
         elif kind == 'scene':
             self.scene(arg)
+        elif kind == 'tract':
+            self.clear_tracts() if arg == 'clear' else self.toggle_tract(arg)
         elif kind == 'side':
             self.setside(arg)
         elif kind == 'look':
