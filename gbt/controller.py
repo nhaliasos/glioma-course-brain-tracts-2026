@@ -7,7 +7,7 @@ import vtk  # noqa: F401  (kept: some scene operations rely on it being imported
 
 
 class Controller:
-    TR = {'slf': ['SLF I', 'SLF II', 'SLF III'], 'arcuate': ['Arcuate'], 'ifof': ['IFOF'], 'ilf': ['ILF'],
+    TR = {'slf': ['SLF I', 'SLF II', 'SLF III'], 'slf1': ['SLF I'], 'slf2': ['SLF II'], 'slf3': ['SLF III'], 'arcuate': ['Arcuate'], 'ifof': ['IFOF'], 'ilf': ['ILF'],
           'optic': ['Optic radiation'], 'meyer': ["Meyer's loop"],
           'uf': ['Uncinate'], 'mdlf': ['MdLF'], 'ec': ['External capsule'], 'ic': ['Internal capsule'],
           'cr': ['Corona radiata (frontal)', 'Corona radiata (parietal)'], 'vof': ['VOF'],
@@ -70,7 +70,7 @@ class Controller:
             return ['Tapetum (%s, derived)' % side]
         out = []
         for b in self.TR[key]:
-            out.append(b + (' (clean)' if side == 'left' else ' (right)') if key == 'slf' else b + ' (%s)' % side)
+            out.append(b + (' (clean)' if side == 'left' else ' (right)') if key.startswith('slf') else b + ' (%s)' % side)
         return out
 
     # ---- visibility ----------------------------------------------------

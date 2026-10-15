@@ -18,11 +18,12 @@ SECTIONS = [
     ("SCENE FILE", 1, [("Load scene", "load")]),
     ("HEMISPHERE", 3, [("Left", "side:left"), ("Right", "side:right"), ("Both", "side:both")]),
     ("ASSOCIATION", 2, [
-        ("Arcuate", "tract:arcuate"), ("SLF I-III", "tract:slf"),
-        ("IFOF", "tract:ifof"), ("ILF", "tract:ilf"),
-        ("Uncinate", "tract:uf"), ("MdLF", "tract:mdlf"),
+        ("Arcuate", "tract:arcuate"), ("IFOF", "tract:ifof"),
+        ("ILF", "tract:ilf"), ("Uncinate", "tract:uf"),
+        ("MdLF", "tract:mdlf"),
         ("VOF", "tract:vof"), ("External capsule", "tract:ec"),
     ]),
+    ("SLF", 3, [("SLF I", "tract:slf1"), ("SLF II", "tract:slf2"), ("SLF III", "tract:slf3")]),
     ("PROJECTION", 2, [
         ("Corticospinal", "tract:cst"), ("Frontostriatal", "tract:fstr"),
         ("Internal capsule", "tract:ic"), ("Corona radiata", "tract:cr"),
