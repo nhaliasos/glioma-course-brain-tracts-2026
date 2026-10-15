@@ -4,6 +4,7 @@
 #
 # url / sha256 are null until verified by the first successful fetch.
 # license "unverified" means: check the source page before redistributing.
+# path: folder (or single file) under data/. required: comma-separated files that must exist inside it.
 # Keep the layout: dataset id at 2 spaces, fields at 4 spaces (doctor.py reads it).
 
 version: 1
@@ -13,15 +14,17 @@ datasets:
     description: FreeSurfer fsaverage population-average cortical surfaces and Desikan parcellation
     page: https://surfer.nmr.mgh.harvard.edu/
     url: null
-    path: fsaverage
+    path: FreeSurfer_fsaverage
+    required: lh.pial, rh.pial, lh.inflated, rh.inflated, lh.aparc.annot, rh.aparc.annot
     sha256: null
     license: unverified
 
   org:
-    description: O'Donnell Research Group (ORG) white-matter atlas, tracts used for display (arcuate, IFOF, ILF, SLF, splenium)
+    description: O'Donnell Research Group (ORG) white-matter atlas, one .mrb per tract (T_AF arcuate, T_IOFF, T_ILF, T_SLF-I/II/III, T_CC1-7 corpus callosum parts)
     page: https://dmri.slicer.org/atlases/
     url: null
-    path: org
+    path: ORG_Atlas/ORG-Tracts-MRB
+    required: T_AF.mrb, T_SLF-I.mrb, T_SLF-II.mrb, T_SLF-III.mrb, T_ILF.mrb, T_IOFF.mrb
     sha256: null
     license: unverified
 
@@ -29,7 +32,7 @@ datasets:
     description: T1 volume that accompanies the ORG atlas (all other layers are fitted to it)
     page: https://dmri.slicer.org/atlases/
     url: null
-    path: org_t1
+    path: ORG_Atlas/100HCP-population-mean-T1.nii.gz
     sha256: null
     license: unverified
 
@@ -37,7 +40,8 @@ datasets:
     description: HCP1065 population-averaged tract atlas (optic radiation), Yeh et al.
     page: https://brain.labsolver.org/
     url: null
-    path: hcp1065
+    path: HCP1065
+    required: projection/OR_L.trk.gz, projection/OR_R.trk.gz
     sha256: null
     license: unverified
 
@@ -45,7 +49,8 @@ datasets:
     description: CONSULT population probability maps of Meyer's loop (NeuroVault collection 11045)
     page: https://neurovault.org/collections/11045/
     url: null
-    path: consult
+    path: MeyersLoop_CONSULT
+    required: final_mni_icbm152_t1_tal_nlin_sym_09c_brain.nii.gz
     sha256: null
     license: not stated on the NeuroVault page - link only, do not redistribute
 
@@ -53,6 +58,7 @@ datasets:
     description: SPL/NAC brain atlas, used only for the angular and supramarginal gyri highlight
     page: https://www.spl.harvard.edu/publications/item/view/2037
     url: null
-    path: spl_atlas
+    path: SPL_Atlas
+    required: extracted/spl_pnl_brain_atlas_2007/atlas2007.xml
     sha256: null
     license: unverified

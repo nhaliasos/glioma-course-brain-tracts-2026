@@ -134,17 +134,28 @@ def check_data():
         m = re.match(r"^  (\w+):\s*$", line)
         if m:
             cur = m.group(1)
+            ds[cur] = {"path": None, "required": []}
             continue
         m = re.match(r"^    path:\s*(\S+)", line)
         if m and cur:
-            ds[cur] = m.group(1)
-    for name, rel in ds.items():
-        p = ROOT / "data" / rel
-        if p.is_dir() and any(p.iterdir()):
-            size = sum(f.stat().st_size for f in p.rglob("*") if f.is_file()) / 1e6
-            report("OK", f"Data {name}", f"{size:.0f} MB")
+            ds[cur]["path"] = m.group(1)
+        m = re.match(r"^    required:\s*(.+)$", line)
+        if m and cur:
+            ds[cur]["required"] = [x.strip() for x in m.group(1).split(",") if x.strip()]
+    for name, info in ds.items():
+        p = ROOT / "data" / info["path"]
+        if p.is_file():
+            report("OK", f"Data {name}", f"{p.stat().st_size / 1e6:.0f} MB (file)")
+            continue
+        if not (p.is_dir() and any(p.iterdir())):
+            report("FAIL", f"Data {name}", f"missing or empty: data/{info['path']}")
+            continue
+        missing = [f for f in info["required"] if not (p / f).exists()]
+        size = sum(f.stat().st_size for f in p.rglob("*") if f.is_file()) / 1e6
+        if missing:
+            report("FAIL", f"Data {name}", f"{size:.0f} MB, missing required: {', '.join(missing)}")
         else:
-            report("FAIL", f"Data {name}", f"missing or empty: data/{rel}")
+            report("OK", f"Data {name}", f"{size:.0f} MB, {len(info['required'])} required files present")
 
 
 def check_network():
