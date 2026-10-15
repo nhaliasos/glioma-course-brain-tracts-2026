@@ -6,7 +6,9 @@ that loads the engine from this repo, after backing up whatever was there before
 
     python scripts/install.py              install (or refresh) the hook
     python scripts/install.py --dry-run    show what would happen, change nothing
-    python scripts/install.py --uninstall  put the previous .slicerrc.py back
+    python scripts/install.py --uninstall  remove the gbt2026 hook: Slicer then starts completely normally
+                                           (your previous .slicerrc.py stays saved as .slicerrc.py.pre-gbt2026.bak)
+    python scripts/install.py --uninstall --restore-old   remove the hook AND put the previous .slicerrc.py back
 
 Options for unusual cases: --home PATH (where .slicerrc.py lives) and
 --repo-path TEXT (the repo path to write into the stub, as Slicer's machine sees it).
@@ -43,6 +45,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--uninstall", action="store_true")
+    ap.add_argument("--restore-old", action="store_true")
     ap.add_argument("--home", default=None)
     ap.add_argument("--repo-path", default=None)
     a = ap.parse_args()
@@ -55,16 +58,24 @@ def main():
     say = (lambda s: print(("[dry-run] " if a.dry_run else "") + s))
 
     if a.uninstall:
-        if bak.exists():
-            say(f"restoring {bak.name} -> {rc}")
-            if not a.dry_run:
-                shutil.copy2(bak, rc)
-        elif current and MARKER in current:
-            say(f"no backup found; removing the gbt2026 stub {rc}")
+        if a.restore_old:
+            if bak.exists():
+                say(f"restoring {bak.name} -> {rc}")
+                if not a.dry_run:
+                    shutil.copy2(bak, rc)
+            else:
+                say("no backup of an earlier .slicerrc.py exists; nothing to restore")
+            return 0
+        if current is not None and MARKER in current:
+            say(f"removing the gbt2026 hook {rc} - Slicer will now start without any startup script")
             if not a.dry_run:
                 rc.unlink()
+        elif current is None:
+            say("no .slicerrc.py found; nothing to remove")
         else:
-            say("nothing to uninstall")
+            say(f"{rc} is not the gbt2026 hook; leaving it alone")
+        if bak.exists():
+            say(f"(your earlier startup file is still saved as {bak.name})")
         return 0
 
     stub = STUB % (a.repo_path or str(repo))
