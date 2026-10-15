@@ -4,8 +4,8 @@ Each section is:  (title, buttons_per_row, [(button label, action), ...])
 
 Actions (the same words a keyboard shortcut or a voice command will use later):
     load                          load the scene file
-    scene:<name>                  gyri, glass, inflated, angular, slf, arcuate, ifof, ilf, splenium,
-                                  optic, meyer, visual, lang, tracts, wow, full
+    scene:<name>                  gyri, glass, inflated, angular, slf, arcuate, ifof, ilf, splenium, tapetum,
+                                  uf, mdlf, vof, ec, ic, cr, cst, fstr, sagittal, optic, meyer, visual, lang, tracts, wow, full
     side:<left|right|both>        which hemisphere the tracts are shown on
     look:<left|right|top|front|back|bottom>   camera direction
     layout:<3d|4|conv>            Slicer window layout
@@ -15,4 +15,20 @@ Actions (the same words a keyboard shortcut or a voice command will use later):
 
 SECTIONS = [
     ("SCENE FILE", 1, [("Load scene", "load")]),
+    ("HEMISPHERE", 3, [("Left", "side:left"), ("Right", "side:right"), ("Both", "side:both")]),
+    ("ASSOCIATION", 2, [
+        ("Arcuate", "scene:arcuate"), ("SLF I-III", "scene:slf"),
+        ("IFOF", "scene:ifof"), ("ILF", "scene:ilf"),
+        ("Uncinate", "scene:uf"), ("MdLF", "scene:mdlf"),
+        ("VOF", "scene:vof"), ("External capsule", "scene:ec"),
+    ]),
+    ("PROJECTION", 2, [
+        ("Corticospinal", "scene:cst"), ("Frontostriatal", "scene:fstr"),
+        ("Internal capsule", "scene:ic"), ("Corona radiata", "scene:cr"),
+    ]),
+    ("COMMISSURAL", 2, [("Splenium", "scene:splenium"), ("Tapetum (derived)", "scene:tapetum")]),
+    ("VISUAL", 2, [
+        ("Optic radiation", "scene:optic"), ("Meyer's loop", "scene:meyer"),
+        ("Sagittal stratum (composite)", "scene:sagittal"),
+    ]),
 ]
