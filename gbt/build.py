@@ -199,3 +199,58 @@ TRACT_COLORS = {
     'Frontostriatal': (0.55, 0.05, 0.2), 'Internal capsule': (0.6, 0.6, 0.68),
     'Corona radiata': (0.45, 0.75, 1.0), 'Tapetum': (0.5, 0.5, 0.0),
 }
+
+
+# ---- Tapetum (derived) --------------------------------------------------------------
+def tapetum_segments(streams, vent_pts, dmin=1.5, dmax=7.0, minlen=8):
+    """Parts of splenial streamlines that run in a thin shell lateral to a lateral ventricle.
+
+    The tapetum is the sheet of splenium fibres lying against the ependyma on the roof and lateral
+    wall of the atrium and the occipital/temporal horns. A streamline point is kept when it is
+    outside the ventricle (>= dmin mm from the nearest ventricle vertex), within dmax mm of it, and
+    not medial to that vertex (|x| >= |x_vertex| - 1). Consecutive kept points (no jump > 5 mm)
+    form segments; short ones (< minlen points) are dropped.
+    """
+    from scipy.spatial import cKDTree
+    tree = cKDTree(vent_pts)
+    segs = []
+    for s in streams:
+        d, i = tree.query(s)
+        ok = (d >= dmin) & (d <= dmax) & (np.abs(s[:, 0]) >= np.abs(vent_pts[i, 0]) - 1.0)
+        cur = []
+        for k in range(len(s)):
+            if ok[k] and (not cur or np.linalg.norm(s[k] - s[k - 1]) < 5):
+                cur.append(k)
+            else:
+                if len(cur) >= minlen:
+                    segs.append(s[cur])
+                cur = [k] if ok[k] else []
+        if len(cur) >= minlen:
+            segs.append(s[cur])
+    return segs
+
+
+def _world_points(node):
+    pts = vtk_to_numpy(node.GetPolyData().GetPoints().GetData()).astype(float)
+    tn = node.GetParentTransformNode()
+    if tn is None:
+        return pts
+    g = vtk.vtkGeneralTransform()
+    tn.GetTransformToWorld(g)
+    return np.array([g.TransformPoint(p) for p in pts])
+
+
+def add_tapetum(mrb_dir, per_side=250, color=(0.5, 0.5, 0.0), opacity=0.15):
+    """Build 'Tapetum (left, derived)' / '(right, derived)' from ORG T_CC6+T_CC7 and the SPL
+    lateral ventricle models (they must already be in the scene). Returns segment counts."""
+    streams = []
+    for t in ('T_CC6', 'T_CC7'):
+        streams += read_org_streamlines(os.path.join(mrb_dir, t + '.mrb'))
+    left, right = split_sides(streams)
+    summary = {}
+    for side, group in (('left', left), ('right', right)):
+        vent = _world_points(slicer.util.getNode('Ventricles: lateral_ventricle (%s)' % side))
+        segs = tapetum_segments(group, vent)
+        summary[side] = len(segs)
+        add_tube_model('Tapetum (%s, derived)' % side, sample(segs, per_side), color, opacity)
+    return summary
